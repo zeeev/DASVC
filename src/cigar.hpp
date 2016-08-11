@@ -12,8 +12,11 @@
 
 using namespace BamTools;
 
-void   advanceReference(const char, const uint32_t, long int *);
-void   advanceQuery(    const char, const uint32_t, long int *);
-double percentID(   std::vector< CigarOp > & cigs, int32_t len);
+void    advanceReference(const char, const uint32_t, long int  *      );
+void    advanceQuery(    const char, const uint32_t, long int  *      );
+void    advanceQuery(    const char, const uint32_t, long int  *, bool);
+
+long int qLen(        std::vector< CigarOp > & cigs                   );
+double   percentID(   std::vector< CigarOp > & cigs, int32_t len      );
 
 #endif
