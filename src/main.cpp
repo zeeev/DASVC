@@ -19,11 +19,12 @@ void readInternalPrint(BamAlignment & al,
                        FastaReference & targetFa,
                        std::string & refName )
 {
-    std::cerr << al.Name
-              << "\t" << al.Position
-              << "\t" << al.GetEndPosition()
-              << "\t" << al.Length
-              << "\t" << percentID(al.CigarData, al.Length) << std::endl;
+    /*    std::cerr << al.Name
+          << "\t" << al.Position
+          << "\t" << al.GetEndPosition()
+          << "\t" << al.Length
+          << "\t" << percentID(al.CigarData, al.Length) << std::endl;
+    */
 
     long int qPos = 0;
     long int rPos = al.Position;
@@ -35,6 +36,8 @@ void readInternalPrint(BamAlignment & al,
             std::cout << "INSERTION"
                       << "\t" << rPos
                       << "\t" << al.QueryBases.substr(qPos, it->Length)
+                      << "\t"
+                      << it->Length
                       << std::endl;
         }
         if(it->Type == 'D'){
@@ -42,6 +45,8 @@ void readInternalPrint(BamAlignment & al,
                       << "\t" << rPos
                       << "\t" << targetFa.getSubSequence(refName,
                                                          rPos+1, it->Length)
+                      << "\t"
+                      << it->Length
                       << std::endl;
         }
         advanceQuery(it->Type,     it->Length, &qPos);

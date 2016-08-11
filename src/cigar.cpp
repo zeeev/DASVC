@@ -78,17 +78,17 @@ void advanceQuery(const char o, const uint32_t l, long int * pos){
         }
     case 'S':
         {
-            *pos += 1;
+            *pos += l;
             break;
         }
     case '=':
         {
-            *pos += 1;
+            *pos += l;
             break;
         }
     case 'X':
         {
-            *pos += 1;
+            *pos += l;
             break;
         }
     default:
@@ -115,17 +115,17 @@ void advanceReference(const char o, const uint32_t l, long int * pos){
         }
     case '=':
         {
-            *pos += 1;
+            *pos += l;
             break;
         }
     case 'X':
         {
-            *pos += 1;
+            *pos += l;
             break;
         }
     case 'D':
         {
-            *pos += 1;
+            *pos += l;
             break;
         }
 
