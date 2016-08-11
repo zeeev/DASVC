@@ -5,8 +5,12 @@
 #include "split.hpp"
 #include "cigar.hpp"
 
+/* bamtools */
 #include "api/BamWriter.h"
 #include "api/BamMultiReader.h"
+
+/* fasta hack */
+#include "Fasta.h"
 
 using namespace BamTools;
 
@@ -14,11 +18,18 @@ int main(int argc, char ** argv) {
 
     std::map<std::string, int> inverseLookup;
 
-    if(argc < 2){
+    /* target is the ref genome */
+    /* query is required for inter alignment insertion */
+
+    FastaReference targetFasta ;
+    FastaReference queryFasta  ;
+
+    targetFasta.open(argv[2])  ;
+    queryFasta.open(argv[3])   ;
+
+    if(argc < 3){
         std::cerr << std::endl;
-        std::cerr << "usage: contigSV your.bam" << std::endl;
-        std::cerr << " INFO: bamfile: " << argv[1] << std::endl;
-        std::cerr << std::endl;
+        std::cerr << "usage: contigSV your.bam refgenome.fa querygenome.fa" << std::endl;
         exit(1);
     }
 
@@ -58,7 +69,6 @@ int main(int argc, char ** argv) {
 
             advanceQuery(it->Type, it->Length, &qPos);
             advanceReference(it->Type, it->Length, &rPos);
-
 
 
         }
