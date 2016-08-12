@@ -10,7 +10,6 @@
 
 double percentID(std::vector< CigarOp > & cigs, int32_t len){
 
-    double percentID = 0;
     double num       = 0;
     double denom     = 0;
 

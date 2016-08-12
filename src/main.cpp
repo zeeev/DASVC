@@ -1,171 +1,51 @@
-#include <iostream>
-#include <stdlib.h>
-#include <stdio.h>
 #include <map>
-#include <list>
-#include <cmath>
-#include "split.hpp"
-#include "cigar.hpp"
+#include <string>
+#include "errors.hpp"
+#include "annotate.hpp"
+#include "varcall.hpp"
 
-/* bamtools */
-#include "api/BamWriter.h"
-#include "api/BamMultiReader.h"
-
-/* fasta hack */
-#include "Fasta.h"
-
-using namespace BamTools;
-
-//------------------------------------------------------------------------------
-void alignmentInternalPrint(BamAlignment & al,
-                       FastaReference & targetFa,
-                       std::string & refName )
-{
-
-    /*    std::cerr << al.Name
-          << "\t" << al.Position
-          << "\t" << al.GetEndPosition()
-          << "\t" << al.Length
-          << "\t" << percentID(al.CigarData, al.Length) << std::endl;
-    */
-
-    long int qPos = 0;
-    long int rPos = al.Position;
-
-    for(std::vector< CigarOp >::iterator it = al.CigarData.begin();
-        it != al.CigarData.end(); it++){
-
-        if(it->Type == 'I'){
-            std::cout << "INSERTION"
-                      << "\t" << refName
-                      << "\t" << rPos
-                      << "\t" << it->Length
-                      << "\t" << al.QueryBases.substr(qPos, it->Length)
-                      << std::endl;
-        }
-        if(it->Type == 'D'){
-            std::cout << "DELETION"
-                      << "\t" << refName
-                      << "\t" << rPos
-                      << "\t" << it->Length
-                      << "\t" << targetFa.getSubSequence(refName,
-                                                         rPos, it->Length)
-                      << std::endl;
-        }
-        advanceQuery(it->Type,     it->Length, &qPos);
-        advanceReference(it->Type, it->Length, &rPos);
-    }
-}
-
-//------------------------------------------------------------------------------
-
-bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
-                           FastaReference & queryFasta,
-                           std::string & refName )
-{
-    if(twoReads.front().RefID != twoReads.back().RefID){
-        return false;
-    }
-    if(twoReads.front().GetEndPosition() != twoReads.back().Position){
-        return false;
-    }
-    if(twoReads.front().IsReverseStrand()
-       != twoReads.back().IsReverseStrand()){
-        return false;
-    }
-    if( twoReads.front().CigarData.back().Type != 'H' &&
-        twoReads.back().CigarData.front().Type != 'H'){
-        return false;
-    }
-
-    long int qPosH = 0;
-
-    /* You need to know the query stop from the start (include leading clip)
-       to the base before the hard clip at the end.
-     */
-
-    for(long int i = 0 ; i < twoReads.front().CigarData.size() -1; i++){
-        advanceQuery(twoReads.front().CigarData[i].Type,
-                     twoReads.front().CigarData[i].Length, &qPosH, true);
-    }
-
-    long int insertionL = twoReads.back().CigarData.front().Length - qPosH ;
-
-    if(insertionL < 0){
-        std::cerr << "WARNING: decreasing query pos" << std::endl;
-        return false;
-    }
-
-    std::cout << "INS"
-              << "\t" << refName
-              << "\t" << twoReads.front().Name
-              << "\t" << twoReads.front().GetEndPosition()
-              << "\t" << insertionL
-              << "\t" << queryFasta.getSubSequence(twoReads.front().Name,
-                                                   qPosH,
-                                                   insertionL)
-
-              << std::endl;
-
-    return true;
-}
-
-//------------------------------------------------------------------------------
+std::map< std::string, int > PROGS;
 
 int main(int argc, char ** argv)
 {
+    errorHandler EH;
 
-    std::map<std::string, int> inverseLookup;
+    std::map< std::string, int > PROGS;
 
-    if(argc != 4){
-        std::cerr << std::endl;
-        std::cerr << "usage: contigSV your.bam refgenome.fa querygenome.fa"
-                  << std::endl;
-        return(1);
-    }
-    /* target is the ref genome */
-    /* query is required for inter alignment insertion */
+    PROGS[ "annotate" ] = 1;
+    PROGS[ "varcall"  ] = 2;
 
-    FastaReference targetFasta ;
-    FastaReference queryFasta  ;
-
-    targetFasta.open(argv[2])  ;
-    queryFasta.open(argv[3] )  ;
-
-    std::string bname = argv[1];
-
-    BamReader br;
-
-    if(!br.Open(bname)){
-        std::cerr << "FATAL: could not open bam file" << std::endl;
-        return(1);
-    }
-    if(!br.LocateIndex()){
-        std::cerr << "FATAL: could not locate bam index" << std::endl;
-        std::cerr << "INFO:  check that index is bam.bai" << std::endl;
-        return(1);
+    if(argc < 2){
+        EH.croak(EH.USAGE, true);
     }
 
-    RefVector rv     = br.GetReferenceData();
+    std::string prog = argv[1];
 
-    BamAlignment al;
+    if(PROGS.find(prog) == PROGS.end()){
+        EH.croak(EH.BAD_COMMAND_LINE_OPTION, true, prog);
+    }
 
-    std::list<BamAlignment> readBuffer;
+    switch(PROGS[argv[1]]){
+    case 1:
+        {
+            return annotate((std::string)argv[2]);
+            break;
+        }
+    case 2:
+        {
+            std::string bf = argv[2];
+            std::string tf = argv[3];
+            std::string qf = argv[4];
 
-    while(br.GetNextAlignment(al)){
-        alignmentInternalPrint(al, targetFasta, rv[al.RefID].RefName);
-
-        if(readBuffer.size() == 2){
-            betweenAlignmentPrint(readBuffer, queryFasta,
-                                  rv[al.RefID].RefName);
-            readBuffer.pop_front();
+            return varcall(bf, tf, qf);
+            break;
         }
 
-        readBuffer.push_back(al);
+    default:
+        {
+            /* should never hit here */
+        }
     }
-
-    betweenAlignmentPrint(readBuffer, queryFasta,
-                          rv[al.RefID].RefName);
 
     return 0;
 }

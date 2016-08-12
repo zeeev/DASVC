@@ -27,20 +27,30 @@ int annotate(std::string bfName)
     if(!br.Open(bfName)){
         EH.croak(EH.COULD_NOT_OPEN_BAM, true);
     }
-    if(!br.LocateIndex()){
-        EH.croak(EH.COULD_NOT_OPEN_BAM_INDEX, true);
-    }
+
+    EH.printInfo("Starting to annotate alignment blocks.");
 
     BamAlignment al;
-
-    std::list<BamAlignment> readBuffer;
 
     if(!br.GetNextAlignment(al)){
         EH.croak(EH.NO_READS, true);
     }
 
-    while(br.GetNextAlignment(al)){
+    std::list<BamAlignment> readBuffer;
 
+    while(br.GetNextAlignment(al)){
+        if(readBuffer.empty()){
+            readBuffer.push_back(al);
+            continue;
+        }
+        else{
+            if(readBuffer.back().Name != al.Name){
+
+                //orientBlocks();
+                readBuffer.clear()     ;
+                readBuffer.push_back(al);
+            }
+        }
     }
 
     return 0;
