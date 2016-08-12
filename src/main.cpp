@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <map>
 #include <list>
+#include <cmath>
 #include "split.hpp"
 #include "cigar.hpp"
 
@@ -72,28 +73,40 @@ bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
        != twoReads.back().IsReverseStrand()){
         return false;
     }
-
-
-    long int qPos = 0;
-
-    for(std::vector< CigarOp >::iterator it = twoReads.front().CigarData.begin();
-        it != twoReads.front().CigarData.end(); it++){
-        advanceQuery(it->Type,     it->Length, &qPos);
+    if( twoReads.front().CigarData.back().Type != 'H' &&
+        twoReads.back().CigarData.front().Type != 'H'){
+        return false;
     }
 
-    if( twoReads.front().CigarData.back().Type == 'H' &&
-        twoReads.back().CigarData.front().Type  == 'H'){
-        std::cout << "INS"
-                  << "\t" << refName
-                  << "\t" << twoReads.front().Name
-                  << "\t" << twoReads.front().GetEndPosition()
-                  << "\t" << twoReads.front().CigarData.back().Length
-                  << "\t" << queryFasta.getSubSequence(twoReads.front().Name,
-                                                       qPos,
-                                                       twoReads.front().CigarData.back().Length)
+    long int qPosH = 0;
 
-                  << std::endl;
+    /* You need to know the query stop from the start (include leading clip)
+       to the base before the hard clip at the end.
+     */
+
+    for(long int i = 0 ; i < twoReads.front().CigarData.size() -1; i++){
+        advanceQuery(twoReads.front().CigarData[i].Type,
+                     twoReads.front().CigarData[i].Length, &qPosH, true);
     }
+
+    long int insertionL = twoReads.back().CigarData.front().Length - qPosH ;
+
+    if(insertionL < 0){
+        std::cerr << "WARNING: decreasing query pos" << std::endl;
+        return false;
+    }
+
+    std::cout << "INS"
+              << "\t" << refName
+              << "\t" << twoReads.front().Name
+              << "\t" << twoReads.front().GetEndPosition()
+              << "\t" << insertionL
+              << "\t" << queryFasta.getSubSequence(twoReads.front().Name,
+                                                   qPosH,
+                                                   insertionL)
+
+              << std::endl;
+
     return true;
 }
 
