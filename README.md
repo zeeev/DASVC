@@ -1,5 +1,5 @@
-# DASVC
-A tool for calling SVs from genome-wide contig alignments to a reference genome genome alignments.
+# DASVC - De-novo Assembly Structural Variant Caller 
+A tool for calling SVs from genome-wide contig alignments.
 
 # Dependancies (for the full pipeline)
 
@@ -10,7 +10,7 @@ The dependancies are only required if you'd like to run the whole pipeline.  Oth
 3. [UCSC](https://github.com/ENCODE-DCC/kentUtils/tree/master/src). File conversion, chaining and netting.
 3. [SNAKEMAKE](https://bitbucket.org/snakemake/snakemake/wiki/Home). Running the pipeline.
 
-# Annotations added
+# Annotations added to BAM file
 
 1. "QS" Query start
 2. "QE" Query end
