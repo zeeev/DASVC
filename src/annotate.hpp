@@ -3,6 +3,7 @@
 
 #include <list>
 #include <string>
+#include <iostream>
 #include <algorithm>
 
 /* bamtools */

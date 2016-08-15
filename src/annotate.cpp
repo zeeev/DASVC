@@ -71,13 +71,29 @@ int processBlock(std::list< BamAlignment > & readBuffer,
 
         totalAlignedBases += matchingBases;
 
-        it->AddTag<int>( "QS", "i", queryStart      );
-        it->AddTag<int>( "QE", "i", queryEnd        );
-        it->AddTag<int>( "QL", "i", (queryEnd - queryStart));
-        it->AddTag<float>( "PI", "f", pctID);
-        it->AddTag<int>( "MB", "i", matchingBases);
-        it->AddTag<int>( "BI", "i", blockId);
+        /* position where the alignment starts matching */
 
+        it->AddTag<int>( "QS", "i", queryStart      );
+
+        /* position in the aligment where it stops matching */
+
+        it->AddTag<int>( "QE", "i", queryEnd        );
+
+        /* lenght of the alignment block */
+
+        it->AddTag<int>( "QL", "i", (queryEnd - queryStart));
+
+        /* number of matching bases M= */
+
+        it->AddTag<int>( "MB", "i", matchingBases);
+
+        /* percent ID */
+
+        it->AddTag<float>( "PI", "f", pctID);
+
+        /* alignment group ; just another way of saying query name */
+
+        it->AddTag<int>( "BI", "i", blockId);
 
         reads.push_back(*it);
     }
@@ -86,15 +102,66 @@ int processBlock(std::list< BamAlignment > & readBuffer,
 
     int contigOrder = 0;
 
-    for(std::list<BamAlignment>::iterator it = readBuffer.begin();
-        it != readBuffer.end(); it++){
-        contigOrder++;
-        it->AddTag<int>( "AI", "i", contigOrder);
-        it->AddTag<int>( "NB", "i", readBuffer.size());
-        it->AddTag<int>( "TM", "i", totalAlignedBases);
+    for(int i = 0; i < reads.size(); i++){
 
-        writer.SaveAlignment(*it);
+        contigOrder++;
+
+        /* alignment order for after the sort */
+        reads[i].AddTag<int>( "AI", "i", contigOrder      );
+        reads[i].AddTag<int>( "NB", "i", readBuffer.size());
+        reads[i].AddTag<int>( "TM", "i", totalAlignedBases);
+
+        std::stringstream finalAnno;
+        int tmpTag;
+
+        if(i == 0){
+            finalAnno << ".:.:";
+            reads[i+1].GetTag<int>("QS", tmpTag);
+            finalAnno << "," << tmpTag;
+            reads[i+1].GetTag<int>("QE", tmpTag);
+            std::string strand = "+";
+            if(reads[i+1].IsReverseStrand()){
+                strand = "-";
+            }
+            finalAnno << strand;
+
+        }
+        else if(i == readBuffer.size() - 1){
+            reads[i-1].GetTag<int>("QS", tmpTag);
+            finalAnno << "," << tmpTag;
+            reads[i-1].GetTag<int>("QE", tmpTag);
+            std::string strand ="+";
+            if(reads[i-1].IsReverseStrand()){
+                strand = "-";
+            }
+            finalAnno << strand;
+            finalAnno << ":.:.";
+        }
+        else{
+            reads[i-1].GetTag<int>("QS", tmpTag);
+            finalAnno << "," << tmpTag;
+            reads[i-1].GetTag<int>("QE", tmpTag);
+            std::string strand ="+";
+            if(reads[i-1].IsReverseStrand()){
+                strand = "-";
+            }
+            finalAnno << strand << ":.:";
+            reads[i+1].GetTag<int>("QS", tmpTag);
+            finalAnno << "," << tmpTag;
+            reads[i+1].GetTag<int>("QE", tmpTag);
+            strand = "+";
+            if(reads[i+1].IsReverseStrand()){
+                strand = "-";
+            }
+            finalAnno << strand;
+
+        }
+        reads[i].AddTag<std::string>("FA", "Z", finalAnno.str());
+        writer.SaveAlignment(reads[i]);
     }
+
+
+
 
     return 0;
 }
