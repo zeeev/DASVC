@@ -1,4 +1,4 @@
-# DASVC
+# DASVC - De-novo Assembly Structural Variant Caller 
 A tool for calling SVs from genome-wide contig alignments.
 
 # Dependancies (for the full pipeline)
