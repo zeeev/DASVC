@@ -6,12 +6,17 @@ bool qStartSort(const BamAlignment L,
     int  lp;
     int  rp;
 
-    L.GetTag<int>( "QS", lp );
-    R.GetTag<int>( "QS", rp );
+    if(!L.GetTag<int>( "QS", lp )){
+        exit(1);
+    }
+    if(!R.GetTag<int>( "QS", rp )){
+        exit(1);
+    }
 
-    if(lp <= rp){
+    if(lp < rp){
         return true;
     }
+
 
     return false;
 }
@@ -98,9 +103,12 @@ int processBlock(std::list< BamAlignment > & readBuffer,
         reads.push_back(*it);
     }
 
+
     sort(reads.begin(), reads.end(),  qStartSort);
 
     int contigOrder = 0;
+
+    /* contig order information */
 
     for(int i = 0; i < reads.size(); i++){
 
@@ -214,8 +222,19 @@ int annotate(std::string bfName)
     std::list<BamAlignment> readBuffer;
 
     int blockId = 0;
+    int numberOfAlignments = 0;
 
     while(reader.GetNextAlignment(al)){
+
+        numberOfAlignments+=1;
+
+        if((numberOfAlignments % 1000) == 0 ){
+            std::stringstream ss;
+            ss << "Number of contigs / alignments processed: " << blockId << " " << numberOfAlignments;
+            EH.printInfo(ss.str());
+        }
+
+
         if(readBuffer.empty()){
             readBuffer.push_back(al);
             continue;
@@ -232,6 +251,9 @@ int annotate(std::string bfName)
             }
         }
     }
+
+    blockId += 1;
+    processBlock(readBuffer, writer, blockId);
 
     reader.Close();
     writer.Close();

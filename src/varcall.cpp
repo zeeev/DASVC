@@ -57,6 +57,7 @@ bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
     if(twoReads.front().RefID != twoReads.back().RefID){
         return false;
     }
+    /* deletions bodering and insertion will be a problem */
     if(twoReads.front().GetEndPosition() != twoReads.back().Position){
         return false;
     }
@@ -69,23 +70,29 @@ bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
         return false;
     }
 
-    long int qPosH = 0;
+    /* start and end of the SV relative to query */
 
-    /* You need to know the query stop from the start (include leading clip)
-       to the base before the hard clip at the end.
+    int qStart ;
+    int qEnd   ;
+
+    int alA ;
+    int alB ;
+
+    twoReads.front().GetTag<int>("QE", qStart);
+    twoReads.back().GetTag<int>("QS", qEnd);
+
+    twoReads.front().GetTag<int>("AI", alA);
+    twoReads.back().GetTag<int>("AI", alB);
+
+    /* next alignment block needs to be the next query block.
     */
 
-    for(unsigned int i = 0 ; i < twoReads.front().CigarData.size() -1; i++){
-        advanceQuery(twoReads.front().CigarData[i].Type,
-                     twoReads.front().CigarData[i].Length, &qPosH, true);
-    }
 
-    long int insertionL = twoReads.back().CigarData.front().Length - qPosH ;
-
-    if(insertionL < 0){
-        std::cerr << "WARNING: decreasing query pos" << std::endl;
+    if((alA + 1) != alB){
         return false;
     }
+
+    int insertionL = abs(qEnd - qStart);
 
     std::cout << "INS"
               << "\t" << refName
@@ -93,7 +100,7 @@ bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
               << "\t" << twoReads.front().GetEndPosition()
               << "\t" << insertionL
               << "\t" << queryFasta.getSubSequence(twoReads.front().Name,
-                                                   qPosH,
+                                                   qStart,
                                                    insertionL)
 
               << std::endl;
@@ -138,6 +145,10 @@ bool varcall(std::string & bname,   /* bam name */
     while(br.GetNextAlignment(al)){
         alignmentInternalPrint(al, targetFasta, rv[al.RefID].RefName);
 
+        if(!al.HasTag("FA")){
+            EH.croak(EH.BAM_NOT_ANNOTATED, true);
+        }
+
         if(readBuffer.size() == 2){
             betweenAlignmentPrint(readBuffer, queryFasta,
                                   rv[al.RefID].RefName);
@@ -149,6 +160,8 @@ bool varcall(std::string & bname,   /* bam name */
 
     betweenAlignmentPrint(readBuffer, queryFasta,
                       rv[al.RefID].RefName);
+
+    br.Close();
 
     return true;
 }

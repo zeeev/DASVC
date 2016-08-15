@@ -12,6 +12,7 @@ public:
         COULD_NOT_OPEN_BAM_INDEX,
         NO_READS,
         BAD_COMMAND_LINE_OPTION,
+        BAM_NOT_ANNOTATED,
         USAGE
     };
 
