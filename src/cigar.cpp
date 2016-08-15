@@ -8,7 +8,7 @@
  Function details: [(M + =) - (I+D+X)] / (M + =)
 */
 
-double percentID(std::vector< CigarOp > & cigs, int32_t len){
+double percentID(std::vector< CigarOp > & cigs, int32_t len, int * mb){
 
     double num       = 0;
     double denom     = 0;
@@ -48,6 +48,7 @@ double percentID(std::vector< CigarOp > & cigs, int32_t len){
             }
         }
     }
+    *mb = (int)num;
     return num / (denom + num);
 }
 

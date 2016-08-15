@@ -31,6 +31,8 @@ int processBlock(std::list< BamAlignment > & readBuffer,
                  BamWriter & writer, int blockId)
 {
 
+    int totalAlignedBases = 0;
+
     std::vector<BamAlignment> reads;
 
     for(std::list<BamAlignment>::iterator it = readBuffer.begin();
@@ -63,22 +65,34 @@ int processBlock(std::list< BamAlignment > & readBuffer,
             advanceQuery(iz->Type, iz->Length, &queryEnd, true);
         }
 
-        double pctID = percentID(it->CigarData, it->Length);
+        int matchingBases = 0;
+
+        double pctID = percentID(it->CigarData, it->Length, &matchingBases);
+
+        totalAlignedBases += matchingBases;
 
         it->AddTag<int>( "QS", "i", queryStart      );
         it->AddTag<int>( "QE", "i", queryEnd        );
         it->AddTag<int>( "QL", "i", (queryEnd - queryStart));
         it->AddTag<float>( "PI", "f", pctID);
+        it->AddTag<int>( "MB", "i", matchingBases);
         it->AddTag<int>( "BI", "i", blockId);
-        it->AddTag<int>( "NB", "i", readBuffer.size());
+
 
         reads.push_back(*it);
     }
 
     sort(reads.begin(), reads.end(),  qStartSort);
 
+    int contigOrder = 0;
+
     for(std::list<BamAlignment>::iterator it = readBuffer.begin();
         it != readBuffer.end(); it++){
+        contigOrder++;
+        it->AddTag<int>( "AI", "i", contigOrder);
+        it->AddTag<int>( "NB", "i", readBuffer.size());
+        it->AddTag<int>( "TM", "i", totalAlignedBases);
+
         writer.SaveAlignment(*it);
     }
 
