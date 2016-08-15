@@ -113,12 +113,16 @@ int processBlock(std::list< BamAlignment > & readBuffer,
 
         std::stringstream finalAnno;
         int tmpTag;
+        if(reads.size() == 1){
+            finalAnno << ".:.:.";
+        }
 
-        if(i == 0){
+        else if(i == 0){
             finalAnno << ".:.:";
             reads[i+1].GetTag<int>("QS", tmpTag);
-            finalAnno << "," << tmpTag;
+            finalAnno << tmpTag << ",";
             reads[i+1].GetTag<int>("QE", tmpTag);
+            finalAnno << tmpTag;
             std::string strand = "+";
             if(reads[i+1].IsReverseStrand()){
                 strand = "-";
@@ -128,8 +132,9 @@ int processBlock(std::list< BamAlignment > & readBuffer,
         }
         else if(i == readBuffer.size() - 1){
             reads[i-1].GetTag<int>("QS", tmpTag);
-            finalAnno << "," << tmpTag;
+            finalAnno << tmpTag << ",";
             reads[i-1].GetTag<int>("QE", tmpTag);
+            finalAnno << tmpTag;
             std::string strand ="+";
             if(reads[i-1].IsReverseStrand()){
                 strand = "-";
@@ -139,16 +144,18 @@ int processBlock(std::list< BamAlignment > & readBuffer,
         }
         else{
             reads[i-1].GetTag<int>("QS", tmpTag);
-            finalAnno << "," << tmpTag;
+            finalAnno << tmpTag << ",";
             reads[i-1].GetTag<int>("QE", tmpTag);
+            finalAnno << tmpTag;
             std::string strand ="+";
             if(reads[i-1].IsReverseStrand()){
                 strand = "-";
             }
             finalAnno << strand << ":.:";
             reads[i+1].GetTag<int>("QS", tmpTag);
-            finalAnno << "," << tmpTag;
+            finalAnno << tmpTag << ",";
             reads[i+1].GetTag<int>("QE", tmpTag);
+            finalAnno << tmpTag;
             strand = "+";
             if(reads[i+1].IsReverseStrand()){
                 strand = "-";
