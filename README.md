@@ -1,5 +1,5 @@
 # DASVC
-A tool for calling SVs from genome-wide contig alignments to a reference genome genome alignments.
+A tool for calling SVs from genome-wide contig alignments.
 
 # Dependancies (for the full pipeline)
 
