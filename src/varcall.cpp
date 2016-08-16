@@ -41,7 +41,7 @@ void alignmentInternalPrint(BamAlignment & al,
                       << "\t" << pctA
                       << "\t" << mbA
                       << "\t" << al.Name
-                      << "INS:INTERNAL"
+                      << "\t" << "INS:INTERNAL"
                       << "\t" << al.QueryBases.substr(qPos, it->Length)
                       << std::endl;
         }
@@ -53,7 +53,7 @@ void alignmentInternalPrint(BamAlignment & al,
                       << "\t" << pctA
                       << "\t" << mbA
                       << "\t" << al.Name
-                      << "DEL:INTERNAL"
+                      << "\t" << "DEL:INTERNAL"
                       << "\t" << targetFa.getSubSequence(refName,
                                                          rPos, it->Length)
                       << std::endl;
@@ -145,6 +145,8 @@ bool varcall(std::string & bname,   /* bam name */
             std::string & tf   ,   /* target fasta */
             std::string & qf    )  /* query fasta */
 {
+
+    std::cout << "#target_name\ttarget_pos\ttarget_end\tsv_length\tper_id\tmatching_bases\tquery_name\tsequence" << std::endl;
 
     errorHandler EH;
 
