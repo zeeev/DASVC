@@ -34,7 +34,7 @@ void alignmentInternalPrint(BamAlignment & al,
         it != al.CigarData.end(); it++){
 
         if(it->Type == 'I'){
-            std::cout << "\t" << refName
+            std::cout << refName
                       << "\t" << rPos
                       << "\t" << rPos
                       << "\t" << it->Length
@@ -46,7 +46,7 @@ void alignmentInternalPrint(BamAlignment & al,
                       << std::endl;
         }
         if(it->Type == 'D'){
-            std::cout << "\t" << refName
+            std::cout << refName
                       << "\t" << rPos
                       << "\t" << (rPos + it->Length)
                       << "\t" << it->Length
@@ -123,7 +123,7 @@ bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
 
     int insertionL = abs(qEnd - qStart);
 
-    std::cout << "\t" << refName
+    std::cout << refName
               << "\t" << twoReads.front().GetEndPosition()
               << "\t" << twoReads.front().GetEndPosition()
               << "\t" << insertionL
