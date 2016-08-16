@@ -24,22 +24,36 @@ void alignmentInternalPrint(BamAlignment & al,
     long int qPos = 0;
     long int rPos = al.Position;
 
+    float pctA;
+    int mbA;
+
+    al.GetTag<float>("PI", pctA);
+    al.GetTag<int>("MB", mbA   );
+
     for(std::vector< CigarOp >::iterator it = al.CigarData.begin();
         it != al.CigarData.end(); it++){
 
         if(it->Type == 'I'){
-            std::cout << "INSERTION"
-                      << "\t" << refName
+            std::cout << "\t" << refName
+                      << "\t" << rPos
                       << "\t" << rPos
                       << "\t" << it->Length
+                      << "\t" << pctA
+                      << "\t" << mbA
+                      << "\t" << al.Name
+                      << "INS:INTERNAL"
                       << "\t" << al.QueryBases.substr(qPos, it->Length)
                       << std::endl;
         }
         if(it->Type == 'D'){
-            std::cout << "DELETION"
-                      << "\t" << refName
+            std::cout << "\t" << refName
                       << "\t" << rPos
+                      << "\t" << (rPos + it->Length)
                       << "\t" << it->Length
+                      << "\t" << pctA
+                      << "\t" << mbA
+                      << "\t" << al.Name
+                      << "DEL:INTERNAL"
                       << "\t" << targetFa.getSubSequence(refName,
                                                          rPos, it->Length)
                       << std::endl;
@@ -109,13 +123,14 @@ bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
 
     int insertionL = abs(qEnd - qStart);
 
-    std::cout << "INS"
-              << "\t" << refName
-              << "\t" << twoReads.front().Name
+    std::cout << "\t" << refName
+              << "\t" << twoReads.front().GetEndPosition()
               << "\t" << twoReads.front().GetEndPosition()
               << "\t" << insertionL
-              << "\t" << mbA << "," << mbB
               << "\t" << pctA << "," << pctB
+              << "\t" << mbA << "," << mbB
+              << "\t" << twoReads.front().Name
+              << "\t" << "INS:BETWEEN"
               << "\t" << queryFasta.getSubSequence(twoReads.front().Name,
                                                    qStart,
                                                    insertionL)
