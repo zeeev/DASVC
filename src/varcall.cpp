@@ -124,7 +124,7 @@ bool largeDeletionPrint(std::list<BamAlignment> & twoReads,
               << "\t" << "DEL:BETWEEN"
               << "\t" << targetFasta.getSubSequence(refName,
                                                    twoReads.front().GetEndPosition(),
-                                                   deletionL);
+                                                    deletionL) << std::endl;
 
 
     return true;
@@ -193,6 +193,11 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
 
 
     int insertionL = abs(qEnd - qStart);
+
+    if(insertionL == 0){
+        return false;
+    }
+
 
     std::cout << refName
               << "\t" << twoReads.front().GetEndPosition()
