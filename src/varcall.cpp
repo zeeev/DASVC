@@ -63,8 +63,79 @@ void alignmentInternalPrint(BamAlignment & al,
     }
 }
 //------------------------------------------------------------------------------
+bool largeDeletionPrint(std::list<BamAlignment> & twoReads,
+                        FastaReference & targetFasta,
+                        std::string & refName ){
 
-bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
+    if(twoReads.front().GetEndPosition() == twoReads.back().Position){
+        return false;
+    }
+    if(twoReads.front().RefID != twoReads.back().RefID){
+        return false;
+    }
+    if(twoReads.front().IsReverseStrand()
+       != twoReads.back().IsReverseStrand()){
+        return false;
+    }
+
+    /* start and end of the SV relative to query */
+
+    int qStart ;
+    int qEnd   ;
+
+    int alA ;
+    int alB ;
+
+    float pctA;
+    float pctB;
+
+    int mbA;
+    int mbB;
+
+
+    twoReads.front().GetTag<int>("QE", qStart);
+    twoReads.back().GetTag<int>("QS", qEnd);
+
+    twoReads.front().GetTag<int>("AI", alA);
+    twoReads.back().GetTag<int>("AI", alB);
+
+    twoReads.front().GetTag<float>("PI", pctA);
+    twoReads.back().GetTag<float>("PI", pctB);
+
+    twoReads.front().GetTag<int>("MB", mbA);
+    twoReads.back().GetTag<int>("MB", mbB);
+
+
+    if((alA + 1) != alB){
+        return false;
+    }
+
+
+    int deletionL = abs( twoReads.back().Position -
+                         twoReads.front().GetEndPosition());
+
+    std::cout << refName
+              << "\t" << twoReads.front().GetEndPosition()
+              << "\t" << twoReads.back().Position
+              << "\t" << deletionL
+              << "\t" << pctA << "," << pctB
+              << "\t" << mbA << "," << mbB
+              << "\t" << twoReads.front().Name
+              << "\t" << "DEL:BETWEEN"
+              << "\t" << targetFasta.getSubSequence(refName,
+                                                   twoReads.front().GetEndPosition(),
+                                                   deletionL);
+
+
+    return true;
+
+}
+
+
+//------------------------------------------------------------------------------
+
+
+bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
                            FastaReference & queryFasta,
                            std::string & refName )
 {
@@ -184,16 +255,17 @@ bool varcall(std::string & bname,   /* bam name */
         }
 
         if(readBuffer.size() == 2){
-            betweenAlignmentPrint(readBuffer, queryFasta,
-                                  rv[al.RefID].RefName);
+            largeInsertionPrint(readBuffer, queryFasta,
+                                rv[al.RefID].RefName  );
+            largeDeletionPrint(readBuffer, targetFasta,
+                               rv[al.RefID].RefName  );
+
+
             readBuffer.pop_front();
         }
 
         readBuffer.push_back(al);
     }
-
-    betweenAlignmentPrint(readBuffer, queryFasta,
-                      rv[al.RefID].RefName);
 
     br.Close();
 
