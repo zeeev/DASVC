@@ -48,14 +48,21 @@ int processBlock(std::list< BamAlignment > & readBuffer,
         for(std::vector<CigarOp>::iterator iz = it->CigarData.begin() ;
             iz != it->CigarData.end() ; iz++){
             /* first matching query position */
-            advanceQuery(iz->Type, iz->Length, &queryStart, true);
-            if( (iz->Type != 'H') || (iz->Type != 'S') ){
+            if( (iz->Type != 'H') && (iz->Type != 'S') ){
                 break;
             }
+            advanceQuery(iz->Type, iz->Length, &queryStart, true);
         }
 
         long int queryEnd   = 0;
         int seen            = 0;
+
+        /* if alignment starts without clip bump the stop condition */
+        if(it->CigarData.front().Type != 'H'
+           && it->CigarData.front().Type != 'S'){
+            seen += 1;
+        }
+
 
         for(std::vector<CigarOp>::iterator iz = it->CigarData.begin() ;
             iz != it->CigarData.end() ; iz++){
@@ -67,6 +74,7 @@ int processBlock(std::list< BamAlignment > & readBuffer,
             if(seen > 1){
                 break;
             }
+
             advanceQuery(iz->Type, iz->Length, &queryEnd, true);
         }
 

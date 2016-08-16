@@ -78,11 +78,25 @@ bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
     int alA ;
     int alB ;
 
+    float pctA;
+    float pctB;
+
+    int mbA;
+    int mbB;
+
+
     twoReads.front().GetTag<int>("QE", qStart);
     twoReads.back().GetTag<int>("QS", qEnd);
 
     twoReads.front().GetTag<int>("AI", alA);
     twoReads.back().GetTag<int>("AI", alB);
+
+    twoReads.front().GetTag<float>("PI", pctA);
+    twoReads.back().GetTag<float>("PI", pctB);
+
+    twoReads.front().GetTag<int>("MB", mbA);
+    twoReads.back().GetTag<int>("MB", mbB);
+
 
     /* next alignment block needs to be the next query block.
     */
@@ -92,6 +106,7 @@ bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
         return false;
     }
 
+
     int insertionL = abs(qEnd - qStart);
 
     std::cout << "INS"
@@ -99,6 +114,8 @@ bool betweenAlignmentPrint(std::list<BamAlignment> & twoReads,
               << "\t" << twoReads.front().Name
               << "\t" << twoReads.front().GetEndPosition()
               << "\t" << insertionL
+              << "\t" << mbA << "," << mbB
+              << "\t" << pctA << "," << pctB
               << "\t" << queryFasta.getSubSequence(twoReads.front().Name,
                                                    qStart,
                                                    insertionL)
