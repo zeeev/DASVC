@@ -33,30 +33,33 @@ void alignmentInternalPrint(BamAlignment & al,
     for(std::vector< CigarOp >::iterator it = al.CigarData.begin();
         it != al.CigarData.end(); it++){
 
-        if(it->Type == 'I'){
-            std::cout << refName
-                      << "\t" << rPos
-                      << "\t" << rPos
-                      << "\t" << it->Length
-                      << "\t" << pctA
-                      << "\t" << mbA
-                      << "\t" << al.Name
-                      << "\t" << "INS:INTERNAL"
-                      << "\t" << al.QueryBases.substr(qPos, it->Length)
-                      << std::endl;
-        }
-        if(it->Type == 'D'){
-            std::cout << refName
-                      << "\t" << rPos
-                      << "\t" << (rPos + it->Length)
-                      << "\t" << it->Length
-                      << "\t" << pctA
-                      << "\t" << mbA
-                      << "\t" << al.Name
-                      << "\t" << "DEL:INTERNAL"
-                      << "\t" << targetFa.getSubSequence(refName,
-                                                         rPos, it->Length)
-                      << std::endl;
+        if(it->Length > 20){
+
+            if(it->Type == 'I'){
+                std::cout << refName
+                          << "\t" << rPos
+                          << "\t" << rPos
+                          << "\t" << it->Length
+                          << "\t" << pctA
+                          << "\t" << mbA
+                          << "\t" << al.Name
+                          << "\t" << "INS:INTERNAL"
+                          << "\t" << al.QueryBases.substr(qPos, it->Length)
+                          << std::endl;
+            }
+            if(it->Type == 'D'){
+                std::cout << refName
+                          << "\t" << rPos
+                          << "\t" << (rPos + it->Length)
+                          << "\t" << it->Length
+                          << "\t" << pctA
+                          << "\t" << mbA
+                          << "\t" << al.Name
+                          << "\t" << "DEL:INTERNAL"
+                          << "\t" << targetFa.getSubSequence(refName,
+                                                             rPos, it->Length)
+                          << std::endl;
+            }
         }
         advanceQuery(it->Type,     it->Length, &qPos);
         advanceReference(it->Type, it->Length, &rPos);
@@ -113,6 +116,10 @@ bool largeDeletionPrint(std::list<BamAlignment> & twoReads,
 
     int deletionL = abs( twoReads.back().Position -
                          twoReads.front().GetEndPosition());
+
+    if(deletionL < 20){
+        return false;
+    }
 
     std::cout << refName
               << "\t" << twoReads.front().GetEndPosition()
@@ -192,9 +199,9 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
     }
 
 
-    int insertionL = abs(qEnd - qStart);
+    int insertionL = qEnd - qStart;
 
-    if(insertionL == 0){
+    if(insertionL < 20){
         return false;
     }
 

@@ -1,0 +1,14 @@
+{
+        "local_path"     : "/var/tmp/zevk/genomes/",
+        "lastz_settings" : "--gfextend --gapped --step=10 --chain --inner=1000 --notransition --format=lav --identity=90 --matchcount=20 --xdrop=20",
+        "target_name"    : "ucsc.hg38.no_alts.fasta",
+        "target_path"    : "/net/eichler/vol2/eee_shared/assemblies/hg38/",
+        "query_name"     : "clint.contigs.quiver.pilon.masked.fasta",
+        "query_path"     : "/net/eichler/vol25/projects/whole_genome_assembly/nobackups/chimp/Drafts/V3.0a-falcon/",
+
+        "cluster_settings" : {
+                           "heaviest" : " -l mfree=20G -l h_rt=48:00:00 -q eichler-short.q  -l disk_free=10G",
+                           "heavy"    : " -l mfree=20G -l h_rt=24:00:00 -q eichler-short.q  -l disk_free=10G",
+                           "light"    : " -l mfree=10G -l h_rt=02:00:00 -q eichler-short.q  -l disk_free=10G"
+        }
+}
