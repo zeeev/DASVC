@@ -200,7 +200,7 @@ int processBlock(std::list< BamAlignment > & readBuffer,
 
 */
 
-int annotate(std::string bfName)
+int annotate(std::string bfName, std::string out)
 {
     BamReader reader;
 
@@ -214,7 +214,7 @@ int annotate(std::string bfName)
     const RefVector references = reader.GetReferenceData();
 
     BamWriter writer;
-    if ( !writer.Open("test.out.bam", header, references) ) {
+    if ( !writer.Open(out, header, references) ) {
         EH.croak(EH.COULD_NOT_OPEN_BAM, true);
     }
 

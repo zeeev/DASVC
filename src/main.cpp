@@ -28,7 +28,8 @@ int main(int argc, char ** argv)
     switch(PROGS[argv[1]]){
     case 1:
         {
-            return annotate((std::string)argv[2]);
+            return annotate((std::string)argv[2],
+                            (std::string)argv[3]);
             break;
         }
     case 2:

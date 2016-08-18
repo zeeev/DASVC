@@ -16,6 +16,6 @@
 
 using namespace BamTools;
 
-int annotate(std::string bfName);
+int annotate(std::string, std::string);
 
 #endif
