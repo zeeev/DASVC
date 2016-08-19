@@ -9,6 +9,7 @@ import csv
 REGIONS="chr1 chr2 chr3 chr4 chr5 chr6 chr7 chr8 chr9 chr10 chr11 chr12 chr13 chr14 chr15 chr16 chr17 chr18 chr19 chr20 chr21 chr22 chrX chrY".split()
 
 LZ   = "~zevk/lastz-distrib/bin/lastz_32"
+SV   = config["contigsv_bin"]
 POST = config["lastz_settings"]
 
 TARGET  = config["target_path"] + config["target_name"]
@@ -26,7 +27,31 @@ RS_LQI="mkdir -p %s ; rsync  --ignore-existing --bwlimit=50000 -v %s %s" % (conf
 FAIDX="samtools faidx %s%s" % (config["local_path"], config["target_name"])
 
 rule dummy:
-     input: "all_bam_read_sort/all.read_sort.bam"
+     input: "raw_sv_calls/calls.bed"
+
+rule call:
+     input: BAM="all_final_bam/final.sort.bam", BI="all_final_bam/final.sort.bam.bai", TF={TARGET}, QU={QUERY}, BIN={SV}
+     output: "raw_sv_calls/calls.bed"
+     params: sge_opts=config["cluster_settings"]["light"]
+     shell: "{input.BIN} varcall {input.BAM} {input.TF} {input.QU} > {output}"
+
+rule index:
+     input : "all_final_bam/final.sort.bam"
+     output: "all_final_bam/final.sort.bam.bai"
+     params: sge_opts=config["cluster_settings"]["light"]
+     shell : "samtools index {input}"
+
+rule posSort:
+     input: "all_bam_read_sort/all.read_sort_annotated.bam"
+     output: "all_final_bam/final.sort.bam"
+     params: sge_opts=config["cluster_settings"]["heavy"]
+     shell : "samtools sort -o {output} {input}"
+
+rule annotateBam:
+     input:  BAM="all_bam_read_sort/all.read_sort.bam", BIN={SV}
+     output: "all_bam_read_sort/all.read_sort_annotated.bam"
+     params: sge_opts=config["cluster_settings"]["light"]
+     shell:  "{input.BIN} annotate {input.BAM} {output}"
 
 rule readSort:
      input:  "all_bam/all.bam"
@@ -62,7 +87,7 @@ rule filtNet:
      input:  "net/all-no-class.net"
      output: "filt_net/all-no-class.filt.net"
      params: sge_opts=config["cluster_settings"]["light"]
-     shell:  "netFilter {input} > {output} && netToBed {output} filt_net/all-no-class-filter.bed"
+     shell:  "netFilter -chimpSyn {input} > {output} && netToBed {output} filt_net/all-no-class-filter.bed"
 
 rule net:
      input:  CHAIN="merged_chains/all.chain.filter.prenet.chain", TS="stats/target.sizes", QS="stats/query.sizes"
