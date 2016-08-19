@@ -224,7 +224,7 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
 }
 //------------------------------- SUBROUTINE --------------------------------
 
-bool varcall(std::string & bname,   /* bam name */
+int varcall(std::string & bname,   /* bam name */
             std::string & tf   ,   /* target fasta */
             std::string & qf    )  /* query fasta */
 {
@@ -281,5 +281,5 @@ bool varcall(std::string & bname,   /* bam name */
 
     br.Close();
 
-    return true;
+    return 0;
 }

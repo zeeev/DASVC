@@ -28,6 +28,6 @@ bool betweenAlignmentPrint(std::list<BamAlignment> &,
                            FastaReference          &,
                            std::string             & );
 
-bool varcall(std::string &, std::string &, std::string &);
+int varcall(std::string &, std::string &, std::string &);
 
 #endif
