@@ -40,6 +40,8 @@ int processBlock(std::list< BamAlignment > & readBuffer,
 
     std::vector<BamAlignment> reads;
 
+    std::map<int, int> matchesPerContig;
+
     for(std::list<BamAlignment>::iterator it = readBuffer.begin();
         it != readBuffer.end(); it++){
 
@@ -82,7 +84,12 @@ int processBlock(std::list< BamAlignment > & readBuffer,
 
         double pctID = percentID(it->CigarData, it->Length, &matchingBases);
 
-        totalAlignedBases += matchingBases;
+        if(matchesPerContig.find(it->RefID) != matchesPerContig.end() ){
+            matchesPerContig[it->RefID] += matchingBases;
+        }
+        else{
+            matchesPerContig[it->RefID] = matchingBases;
+        }
 
         /* position where the alignment starts matching */
 
@@ -108,9 +115,11 @@ int processBlock(std::list< BamAlignment > & readBuffer,
 
         it->AddTag<int>( "BI", "i", blockId);
 
-        reads.push_back(*it);
+        if(matchingBases > 50 && pctID > 0.90 ){
+            totalAlignedBases += matchingBases;
+            reads.push_back(*it);
+        }
     }
-
 
     sort(reads.begin(), reads.end(),  qStartSort);
 
@@ -118,7 +127,35 @@ int processBlock(std::list< BamAlignment > & readBuffer,
 
     /* contig order information */
 
+    int maxRefId = 0;
+    int maxValue = 0;
+
+    for(std::map<int, int>::iterator mp = matchesPerContig.begin();
+        mp != matchesPerContig.end(); mp++){
+        if(mp->second > maxValue){
+            maxRefId = mp->first;
+            maxValue = mp->second;
+        }
+    }
+
+    /* one to one mapping */
+    int lastPos = -1;
+
     for(int i = 0; i < reads.size(); i++){
+
+        if(reads[i].RefID != maxRefId){
+            continue;
+        }
+
+        int QS, QE;
+        reads[i].GetTag<int>("QS", QS);
+        reads[i].GetTag<int>("QE", QE);
+
+        /* it can be equal to the last pos */
+        if(QS < lastPos){
+            continue;
+        }
+        lastPos = QE;
 
         contigOrder++;
 
@@ -126,64 +163,9 @@ int processBlock(std::list< BamAlignment > & readBuffer,
         reads[i].AddTag<int>( "AI", "i", contigOrder      );
         reads[i].AddTag<int>( "NB", "i", readBuffer.size());
         reads[i].AddTag<int>( "TM", "i", totalAlignedBases);
-
-        std::stringstream finalAnno;
-        int tmpTag;
-        if(reads.size() == 1){
-            finalAnno << ".:.:.";
-        }
-
-        else if(i == 0){
-            finalAnno << ".:.:";
-            reads[i+1].GetTag<int>("QS", tmpTag);
-            finalAnno << tmpTag << ",";
-            reads[i+1].GetTag<int>("QE", tmpTag);
-            finalAnno << tmpTag;
-            std::string strand = "+";
-            if(reads[i+1].IsReverseStrand()){
-                strand = "-";
-            }
-            finalAnno << strand;
-
-        }
-        else if(i == readBuffer.size() - 1){
-            reads[i-1].GetTag<int>("QS", tmpTag);
-            finalAnno << tmpTag << ",";
-            reads[i-1].GetTag<int>("QE", tmpTag);
-            finalAnno << tmpTag;
-            std::string strand ="+";
-            if(reads[i-1].IsReverseStrand()){
-                strand = "-";
-            }
-            finalAnno << strand;
-            finalAnno << ":.:.";
-        }
-        else{
-            reads[i-1].GetTag<int>("QS", tmpTag);
-            finalAnno << tmpTag << ",";
-            reads[i-1].GetTag<int>("QE", tmpTag);
-            finalAnno << tmpTag;
-            std::string strand ="+";
-            if(reads[i-1].IsReverseStrand()){
-                strand = "-";
-            }
-            finalAnno << strand << ":.:";
-            reads[i+1].GetTag<int>("QS", tmpTag);
-            finalAnno << tmpTag << ",";
-            reads[i+1].GetTag<int>("QE", tmpTag);
-            finalAnno << tmpTag;
-            strand = "+";
-            if(reads[i+1].IsReverseStrand()){
-                strand = "-";
-            }
-            finalAnno << strand;
-
-        }
-        reads[i].AddTag<std::string>("FA", "Z", finalAnno.str());
+        reads[i].AddTag<std::string>("FA", "Z", "XXX");
         writer.SaveAlignment(reads[i]);
     }
-
-
 
 
     return 0;
