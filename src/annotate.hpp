@@ -13,6 +13,7 @@
 /* my code */
 #include "errors.hpp"
 #include "cigar.hpp"
+#include "chain.hpp"
 
 using namespace BamTools;
 

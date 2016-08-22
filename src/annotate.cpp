@@ -1,5 +1,6 @@
 #include "annotate.hpp"
 
+
 bool qStartSort(const BamAlignment L,
                 const BamAlignment R ){
 
@@ -21,6 +22,44 @@ bool qStartSort(const BamAlignment L,
     return false;
 }
 
+//------------------------------- SUBROUTINE --------------------------------
+/*
+ Function input  : vector of BamAlignments
+ Function does   : chains the query
+ Function returns: error code
+ Function details: runs chaining over the alignments then saves them;
+
+*/
+
+int chainBlock(std::vector<BamAlignment> & reads, BamWriter & br){
+
+
+    chain qChain;
+
+    for(std::vector<BamAlignment>::iterator it = reads.begin();
+        it != reads.end(); it++){
+
+        int match ;
+        int qStart;
+        int qEnd  ;
+
+        it->GetTag<int>("MB", match  );
+        it->GetTag<int>("QS", qStart );
+        it->GetTag<int>("QE", qEnd   );
+
+        qChain.addAlignment(qStart, qEnd, match);
+
+    }
+
+    std::vector<int> indiciesOfAlignments;
+    qChain.buildLinks();
+    qChain.traceback(indiciesOfAlignments);
+
+    return 0;
+
+}
+
+
 
 //------------------------------- SUBROUTINE --------------------------------
 /*
@@ -32,8 +71,9 @@ bool qStartSort(const BamAlignment L,
 
 */
 
-int processBlock(std::list< BamAlignment > & readBuffer,
-                 BamWriter & writer, int blockId)
+int processBlock(std::list< BamAlignment > & readBuffer ,
+                 std::vector< BamAlignment > & processed,
+                 int blockId)
 {
 
     int totalAlignedBases = 0;
@@ -123,9 +163,7 @@ int processBlock(std::list< BamAlignment > & readBuffer,
 
     sort(reads.begin(), reads.end(),  qStartSort);
 
-    int contigOrder = 0;
-
-    /* contig order information */
+    /* best contig match */
 
     int maxRefId = 0;
     int maxValue = 0;
@@ -138,39 +176,20 @@ int processBlock(std::list< BamAlignment > & readBuffer,
         }
     }
 
-    /* one to one mapping */
-    int lastPos = -1;
-
     for(int i = 0; i < reads.size(); i++){
 
         if(reads[i].RefID != maxRefId){
             continue;
         }
 
-        int QS, QE;
-        reads[i].GetTag<int>("QS", QS);
-        reads[i].GetTag<int>("QE", QE);
-
-        /* it can be equal to the last pos */
-        if(QS < lastPos){
-            continue;
-        }
-        lastPos = QE;
-
-        contigOrder++;
-
-        /* alignment order for after the sort */
-        reads[i].AddTag<int>( "AI", "i", contigOrder      );
         reads[i].AddTag<int>( "NB", "i", readBuffer.size());
         reads[i].AddTag<int>( "TM", "i", totalAlignedBases);
-        reads[i].AddTag<std::string>("FA", "Z", "XXX");
-        writer.SaveAlignment(reads[i]);
-    }
 
+        processed.push_back(reads[i]);
+    }
 
     return 0;
 }
-
 
 //------------------------------- SUBROUTINE --------------------------------
 /*
@@ -232,8 +251,14 @@ int annotate(std::string bfName, std::string out)
         else{
             if(readBuffer.back().Name != al.Name){
                 blockId += 1;
-                processBlock(readBuffer, writer, blockId);
-                readBuffer.clear()     ;
+
+                std::vector<BamAlignment> filtReads;
+
+                processBlock(readBuffer, filtReads, blockId);
+                std::cerr << "About to chain" << std::endl;
+                chainBlock(filtReads, writer               );
+
+                readBuffer.clear()      ;
                 readBuffer.push_back(al);
             }
             else{
@@ -243,7 +268,10 @@ int annotate(std::string bfName, std::string out)
     }
 
     blockId += 1;
-    processBlock(readBuffer, writer, blockId);
+
+    std::vector<BamAlignment> filtReadsB;
+    processBlock(readBuffer, filtReadsB, blockId );
+    chainBlock(filtReadsB, writer                );
 
     reader.Close();
     writer.Close();

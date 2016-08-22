@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
 class node{
 public:
@@ -20,10 +21,11 @@ class chain{
 private:
     node               * last;
     std::vector<node *> nodes;
-    bool _buildLinks(  void    );
+
 public:
     chain(void);
     ~chain(void);
+    bool buildLinks(  void    );
     bool addAlignment(int, int, int         );
     bool traceback(std::vector<int> &       );
 };

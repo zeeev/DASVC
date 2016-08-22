@@ -19,7 +19,7 @@ bool _endCmp(const node * L, const node * R){
 
 chain::chain(void){
     /* setting up the source node */
-    addAlignment(-1, -1, -1);
+    addAlignment(-1, -1, 0);
 
 }
 
@@ -30,7 +30,7 @@ chain::~chain(void){
     }
 }
 
-bool chain::_buildLinks(void){
+bool chain::buildLinks(void){
 
     // sorted by end position
     sort(nodes.begin(), nodes.end(), _endCmp);
@@ -48,14 +48,18 @@ bool chain::_buildLinks(void){
        No source or sink.
      */
 
+    for(int i = 0; i < nodes.size(); i++){
+        nodes[i]->index = i;
+    }
+
     for(int i = 1 ; i < nodes.size() - 1; i++){
-        nodes[i]->index = i - 1;
-        for(int j = i ; j > 0; j--){
+        for(int j = i - 1; j > 0; j--){
             if(nodes[i]->start >= nodes[j]->end){
                 nodes[i]->overallScore
                     += nodes[j]->overallScore
                     + (nodes[j]->end - nodes[i]->start);
                 nodes[i]->children.push_back(nodes[j]);
+                break;
             }
         }
     }
@@ -74,25 +78,38 @@ bool chain::_buildLinks(void){
 
 bool chain::traceback(std::vector<int> & alns){
 
-    int max = -1;
 
-    node * current;
+    /*    std::cerr << " tracking back : "
+              << " " << last->index
+              << " " << last->start
+              << " " << last->end
+              << " " << last->matches
+              << " " << last->overallScore
+              << std::endl;
+
+    */
+
+    if(last->children.empty()){
+        return false;
+    }
+
+
+    int max = last->children.front()->overallScore;
+    node * current = last->children.front();
 
     for(std::vector<node *>::iterator it = last->children.begin();
         it != last->children.end(); it++){
-        if(max > (*it)->overallScore){
+        if((*it)->overallScore > max ){
             max       = (*it)->overallScore;
-            current   = *it ;
+            current   =  *it ;
         }
+        //        std::cerr << "child : " <<  (*it)->start << " " << (*it)->end << " " << (*it)->overallScore << std::endl;
     }
 
-
-    if(current->children.empty()){
-        return false;
-    }
-    else{
+    if(last != nodes.back()){
         alns.push_back(current->index);
     }
+    last = current;
 
     return traceback(alns);
 }
