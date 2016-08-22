@@ -9,7 +9,7 @@ A tool for calling SVs from genome-wide contig alignments.
 4. netToMaf mafToSam samToBam
 5. Sorts the bam by query 
 6. Annotates the bam file and chains the query.
-7. Calls Structural variants.
+7. Calls Structural Variants.
 
 # Dependancies (for the full pipeline)
 
