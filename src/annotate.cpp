@@ -75,14 +75,11 @@ int chainBlock(std::vector<BamAlignment> & reads,
         totalMatchingBases += mb;
     }
 
-    int alignmentIndex = 1;
-
     for(std::vector<int>::iterator it = indiciesOfAlignments.begin();
         it != indiciesOfAlignments.end(); it++){
         reads[*it].AddTag<int>("TM", "i", totalMatchingBases);
-        reads[*it].AddTag<int>("AI", "i", alignmentIndex);
+        reads[*it].AddTag<int>("AI", "i", *it);
         br.SaveAlignment(reads[*it]);
-        alignmentIndex++;
     }
 
     int qs;
