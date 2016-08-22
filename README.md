@@ -11,11 +11,19 @@ The dependancies are only required if you'd like to run the whole pipeline.  Oth
 3. [SNAKEMAKE](https://bitbucket.org/snakemake/snakemake/wiki/Home). Running the pipeline.
 
 # Installing
+0. Install dependancies
+1. get and build code
+
 ```
 git clone --recursive https://github.com/zeeev/DASVC.git
 cd DASVC
 make
 ```
+
+2. Export paths to binaries 
+3. Modify the config file: "pipeline/config.json"
+4. Run Snakemake
+
 
 # What the pipeline does
 
