@@ -1,6 +1,15 @@
 # DASVC - De-novo Assembly Structural Variant Caller 
 A tool for calling SVs from genome-wide contig alignments.
 
+# What the pipeline does
+
+1. Aligns a genome (query) to a reference genome (target) using LastZ.
+2. Chains the query genome against the target genome using UCSC
+3. Nets the chains.  This resolves overlapping alignments and inversions.
+4. Chains the query genome, to remove fills.
+5. Calls Structural variants.
+
+
 # Dependancies (for the full pipeline)
 
 The dependancies are only required if you'd like to run the whole pipeline.  Otherwise, you can build you own netted SAM file and run the last step.
@@ -24,14 +33,6 @@ make
 3. Modify the config file: "pipeline/config.json"
 4. Run Snakemake
 
-
-# What the pipeline does
-
-1. Aligns a genome (query) to a reference genome (target) using LastZ.
-2. Chains the query genome against the target genome using UCSC
-3. Nets the chains.  This resolves overlapping alignments and inversions.
-4. Chains the query genome, to remove fills.
-5. Calls Structural variants.
 
 # Annotations added to BAM file
 
