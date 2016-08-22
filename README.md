@@ -10,6 +10,13 @@ The dependancies are only required if you'd like to run the whole pipeline.  Oth
 3. [UCSC](https://github.com/ENCODE-DCC/kentUtils/tree/master/src). File conversion, chaining and netting.
 3. [SNAKEMAKE](https://bitbucket.org/snakemake/snakemake/wiki/Home). Running the pipeline.
 
+# Installing
+```
+git clone --recursive https://github.com/zeeev/DASVC.git
+cd DASVC
+make
+```
+
 # Annotations added to BAM file
 
 1. "QS" Query start
