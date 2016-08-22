@@ -1,7 +1,7 @@
 # DASVC - De-novo Assembly Structural Variant Caller 
 A tool for calling SVs from genome-wide contig alignments.
 
-# What the pipeline does
+# What does the pipeline do?
 
 1. Aligns a genome (query) to a reference genome (target) using LastZ.
 2. Chains the query genome against the target genome using UCSC
@@ -10,7 +10,6 @@ A tool for calling SVs from genome-wide contig alignments.
 5. Sorts the bam by query 
 6. Annotates the bam file and chains the query.
 6. Calls Structural variants.
-
 
 # Dependancies (for the full pipeline)
 
