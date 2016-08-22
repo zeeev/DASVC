@@ -31,7 +31,13 @@ bool qStartSort(const BamAlignment L,
 
 */
 
-int chainBlock(std::vector<BamAlignment> & reads, BamWriter & br){
+int chainBlock(std::vector<BamAlignment> & reads,
+               BamWriter & br,
+                const RefVector & references){
+
+    if(reads.size() == 0){
+        return 1;
+    }
 
     chain qChain;
 
@@ -55,7 +61,9 @@ int chainBlock(std::vector<BamAlignment> & reads, BamWriter & br){
     qChain.traceback(indiciesOfAlignments);
 
     std::cerr << " INFO: n alignments before chaining :"
-              << reads.size() << " and after : " << indiciesOfAlignments.size() << std::endl;
+              << reads.size() << " and after : "
+              << indiciesOfAlignments.size()
+              << " for " << reads.front().Name << std::endl;
 
 
     int totalMatchingBases = 0;
@@ -77,8 +85,26 @@ int chainBlock(std::vector<BamAlignment> & reads, BamWriter & br){
         alignmentIndex++;
     }
 
-    return 0;
+    int qs;
+    int qe;
 
+    reads.front().GetTag<int>("QS", qs);
+    reads.back().GetTag<int>("QE",  qe);
+
+    std::cerr << " ANNOTATION: T_S_E : Q_S_E : "
+              << references[reads.front().RefID].RefName
+              << "_"
+              << reads.front().Position
+              << "_"
+              << reads.back().GetEndPosition()
+              << " : "
+              << reads.front().Name
+              << "_"
+              << qs
+              << "_"
+              << qe << std::endl;
+
+    return 0;
 }
 
 
@@ -164,6 +190,10 @@ int processBlock(std::list< BamAlignment > & readBuffer ,
         /* lenght of the alignment block */
 
         it->AddTag<int>( "QL", "i", (queryEnd - queryStart));
+
+
+        it->AddTag<int>( "TS", "i", it->Position);
+        it->AddTag<int>( "TE", "i", it->GetEndPosition());
 
         /* number of matching bases M= */
 
@@ -273,7 +303,7 @@ int annotate(std::string bfName, std::string out)
                 std::vector<BamAlignment> filtReads;
 
                 processBlock(readBuffer, filtReads, blockId);
-                chainBlock(filtReads, writer               );
+                chainBlock(filtReads, writer,  references);
 
                 readBuffer.clear()      ;
                 readBuffer.push_back(al);
@@ -288,7 +318,7 @@ int annotate(std::string bfName, std::string out)
 
     std::vector<BamAlignment> filtReadsB;
     processBlock(readBuffer, filtReadsB, blockId );
-    chainBlock(filtReadsB, writer                );
+    chainBlock(filtReadsB, writer, references    );
 
     reader.Close();
     writer.Close();
