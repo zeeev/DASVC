@@ -262,7 +262,7 @@ int varcall(std::string & bname,   /* bam name */
     while(br.GetNextAlignment(al)){
         alignmentInternalPrint(al, targetFasta, rv[al.RefID].RefName);
 
-        if(!al.HasTag("FA")){
+        if(!al.HasTag("AI")){
             EH.croak(EH.BAM_NOT_ANNOTATED, true);
         }
 
