@@ -40,10 +40,10 @@ make
 1. "QS" Query start
 2. "QE" Query end
 3. "QL" Query length 
+4. "TS" Target start
+5. "TE" Target end
 4. "MB" Number matching bases in block (=|M)
 5. "PI" Percent identity 
 6. "BI" Block ID (equivalent to query name)
-7. "AI" Alignment block ID sorted by query start "QS"
-8. "NB" The number of aligment blocks for the query sequence
 9. "TM" Total matching bases in query sequence
-10. "FA" Special field. The QS,QE, and strand for the query before and after the current alignment (sorted by query start).
+10. "AI" Query order 1,2,3....
