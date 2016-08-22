@@ -33,7 +33,6 @@ bool qStartSort(const BamAlignment L,
 
 int chainBlock(std::vector<BamAlignment> & reads, BamWriter & br){
 
-
     chain qChain;
 
     for(std::vector<BamAlignment>::iterator it = reads.begin();
@@ -54,6 +53,29 @@ int chainBlock(std::vector<BamAlignment> & reads, BamWriter & br){
     std::vector<int> indiciesOfAlignments;
     qChain.buildLinks();
     qChain.traceback(indiciesOfAlignments);
+
+    std::cerr << " INFO: n alignments before chaining :"
+              << reads.size() << " and after : " << indiciesOfAlignments.size() << std::endl;
+
+
+    int totalMatchingBases = 0;
+
+    for(std::vector<int>::iterator it = indiciesOfAlignments.begin();
+        it != indiciesOfAlignments.end(); it++){
+        int mb = 0;
+        reads[*it].GetTag<int>("MB", mb);
+        totalMatchingBases += mb;
+    }
+
+    int alignmentIndex = 1;
+
+    for(std::vector<int>::iterator it = indiciesOfAlignments.begin();
+        it != indiciesOfAlignments.end(); it++){
+        reads[*it].AddTag<int>("TM", "i", totalMatchingBases);
+        reads[*it].AddTag<int>("AI", "i", alignmentIndex);
+        br.SaveAlignment(reads[*it]);
+        alignmentIndex++;
+    }
 
     return 0;
 
@@ -181,10 +203,6 @@ int processBlock(std::list< BamAlignment > & readBuffer ,
         if(reads[i].RefID != maxRefId){
             continue;
         }
-
-        reads[i].AddTag<int>( "NB", "i", readBuffer.size());
-        reads[i].AddTag<int>( "TM", "i", totalAlignedBases);
-
         processed.push_back(reads[i]);
     }
 
@@ -255,7 +273,6 @@ int annotate(std::string bfName, std::string out)
                 std::vector<BamAlignment> filtReads;
 
                 processBlock(readBuffer, filtReads, blockId);
-                std::cerr << "About to chain" << std::endl;
                 chainBlock(filtReads, writer               );
 
                 readBuffer.clear()      ;

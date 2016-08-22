@@ -49,7 +49,7 @@ bool chain::buildLinks(void){
      */
 
     for(int i = 0; i < nodes.size(); i++){
-        nodes[i]->index = i;
+        nodes[i]->index = i - 1;
     }
 
     for(int i = 1 ; i < nodes.size() - 1; i++){
@@ -103,10 +103,9 @@ bool chain::traceback(std::vector<int> & alns){
             max       = (*it)->overallScore;
             current   =  *it ;
         }
-        //        std::cerr << "child : " <<  (*it)->start << " " << (*it)->end << " " << (*it)->overallScore << std::endl;
     }
 
-    if(last != nodes.back()){
+    if(last != nodes.back() && last != nodes.front()){
         alns.push_back(current->index);
     }
     last = current;
