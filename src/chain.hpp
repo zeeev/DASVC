@@ -4,14 +4,14 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
-
+#include <cmath>
 class node{
 public:
-    int matches     ;
-    int start       ;
-    int end         ;
-    int overallScore;
-    int index       ;
+    double matches       ;
+    double overallScore  ;
+    int start            ;
+    int end              ;
+    int index            ;
 
     std::vector<node *> children;
 
