@@ -75,10 +75,15 @@ int chainBlock(std::vector<BamAlignment> & reads,
         totalMatchingBases += mb;
     }
 
+    sort(indiciesOfAlignments.begin(), indiciesOfAlignments.end());
+
+    int index = 1;
+
     for(std::vector<int>::iterator it = indiciesOfAlignments.begin();
         it != indiciesOfAlignments.end(); it++){
         reads[*it].AddTag<int>("TM", "i", totalMatchingBases);
-        reads[*it].AddTag<int>("AI", "i", *it);
+        reads[*it].AddTag<int>("AI", "i", index);
+        index++;
         br.SaveAlignment(reads[*it]);
     }
 
@@ -204,7 +209,7 @@ int processBlock(std::list< BamAlignment > & readBuffer ,
 
         it->AddTag<int>( "BI", "i", blockId);
 
-        if(matchingBases > 50 && pctID > 0.90 ){
+        if(matchingBases > 100 && pctID > 0.90 ){
             totalAlignedBases += matchingBases;
             reads.push_back(*it);
         }
