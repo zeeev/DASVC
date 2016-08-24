@@ -7,8 +7,11 @@ bool chain::addAlignment(int s, int e, int m){
     n->overallScore = double(m);
     n->start        = s;
     n->end          = e;
+    n->index        = current_index;
 
     nodes.push_back(n);
+
+    current_index++;
 
     return true;
 }
@@ -19,7 +22,8 @@ bool _endCmp(const node * L, const node * R){
 
 chain::chain(void){
     /* setting up the source node */
-    addAlignment(-1, -1, 0);
+    current_index = -1     ;
+    addAlignment(-2, -1, 0);
 
 }
 
@@ -36,52 +40,26 @@ bool chain::buildLinks(void){
     sort(nodes.begin(), nodes.end(), _endCmp);
 
     // adding sink
+    addAlignment(nodes.back()->end + 1, nodes.back()->end +2, 0);
 
-    addAlignment(nodes.back()->end + 1, nodes.back()->end +2, -1);
-
-    // indexing souce and sink
-
-    nodes.front()->index = -1;
-    nodes.back()->index  = -1;
-
-    /* Go from the first real aligment to the last.
-       No source or sink.
-     */
-
-    for(int i = 0; i < nodes.size(); i++){
-        nodes[i]->index = i - 1;
-    }
-
-    for(int i = 1 ; i < nodes.size() - 1; i++){
+    for(int i = 1 ; i < nodes.size() ; i++){
 
         double maxScore = 0;
 
-        for(int j = i - 1; j > 0; j--){
+        for(int j = i - 1; j >= 0; j--){
 
-            if(nodes[i]->start >= nodes[j]->end){
+            if(nodes[j]->end <= nodes[i]->start){
 
-                double tmp_score = nodes[j]->overallScore + (nodes[j]->end - nodes[i]->start);
+                double gap = nodes[j]->end - nodes[i]->start;
+                double tmp_score = nodes[j]->overallScore + gap;
                 if(tmp_score > maxScore){
                     maxScore = tmp_score;
                 }
                 nodes[i]->children.push_back(nodes[j]);
             }
         }
+        //        std::cerr << "node score " << nodes[i]->overallScore << std::endl;
         nodes[i]->overallScore += maxScore;
-    }
-
-    /*
-
-    for(int i = 0 ; i < nodes.size(); i++){
-        std::cerr << "NI: " << nodes[i]->index << " " << nodes[i]->start << " " << nodes[i]->end << " " << nodes[i]->matches << " " << nodes[i]->overallScore << std::endl;
-    }
-
-    */
-    /* Adding all the aligments to the sink.
-       They all end before the sink starts. */
-
-    for(int i = nodes.size() - 2; i > 0; i--){
-        nodes.back()->children.push_back(nodes[i]);
     }
 
     last = nodes.back();
@@ -101,10 +79,13 @@ bool chain::traceback(std::vector<int> & alns){
               << std::endl;
     */
 
-    if(last->children.empty()){
-        return false;
+    if(last != nodes.front() && last != nodes.back() ){
+        alns.push_back(last->index);
     }
 
+    if( last->children.empty() ){
+        return false;
+    }
 
     double max = last->children.front()->overallScore;
     node * current = last->children.front();
@@ -112,27 +93,12 @@ bool chain::traceback(std::vector<int> & alns){
     for(std::vector<node *>::iterator it = last->children.begin();
         it != last->children.end(); it++){
         if((*it)->overallScore > max ){
-            /*            std::cerr << " child: "
-                      << (*it)->index
-                      << " " << (*it)->start
-                      << " " << (*it)->end
-                      << " " << (*it)->overallScore
-                      << " past " << current->index
-                      << " " << max << std::endl;
 
-            */
             max       = (*it)->overallScore;
             current   =  *it ;
-
         }
-
-
-
     }
 
-    if(last != nodes.back() && last != nodes.front()){
-        alns.push_back(current->index);
-    }
     last = current;
 
     return traceback(alns);

@@ -19,6 +19,7 @@ public:
 
 class chain{
 private:
+    int current_index        ;
     node               * last;
     std::vector<node *> nodes;
 
