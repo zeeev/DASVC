@@ -13,7 +13,7 @@ BAMTOOLS_LIB=$(ROOT)/bamtools/lib/libbamtools.a
 
 
 CPP_FILES := $(wildcard src/*.cpp)
-OBJ_FILES := $(addprefix src/obj/,$(notdir $(CPP_FILES:.cpp=.o)))
+OBJ_FILES := $(addprefix src/,$(notdir $(CPP_FILES:.cpp=.o)))
 OBJ_FILES := $(OBJ_FILES) fastahack/disorder.o
 OBJ_FILES := $(OBJ_FILES) fastahack/Fasta.o
 #-------------------------------------------------------------------------------
@@ -23,7 +23,7 @@ all: createBin bin/contigSV
 createBin:
 	-mkdir bin
 
-src/obj/%.o: src/%.cpp $(BAMTOOLS_LIB)
+src/%.o: src/%.cpp $(BAMTOOLS_LIB)
 	$(CXX) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 bin/contigSV: $(OBJ_FILES) $(BAMTOOLS_LIB)
@@ -36,6 +36,6 @@ bamtools/lib/libbamtools.a:
 	cd bamtools && mkdir -p build && cd build && cmake .. && $(MAKE)
 
 clean:
-	rm -rf bin && rm -rf src/obj/* && cd fastahack && $(MAKE) clean
+	rm -rf bin && rm -rf src/*.o && cd fastahack && $(MAKE) clean
 
 #-------------------------------------------------------------------------------
