@@ -6,10 +6,9 @@
 
 CC=gcc
 CXX=g++
-ROOT=$(shell pwd)
 CFLAGS= -Wall -DVERSION=\"$(GIT_VERSION)\" -std=c++0x -lm -lz
-INCLUDE  = -I src -I $(ROOT)/fastahack -I $(ROOT)/bamtools/include
-BAMTOOLS_LIB=$(ROOT)/bamtools/lib/libbamtools.a
+INCLUDE  = -I src -I fastahack -I bamtools/include
+BAMTOOLS_LIB=bamtools/lib/libbamtools.a
 
 
 CPP_FILES := $(wildcard src/*.cpp)
