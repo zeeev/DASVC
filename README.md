@@ -1,5 +1,6 @@
-# DASVC - De-novo Assembly Structural Variant Caller 
+# DASVC - De-novo Assembly Structural Variant Caller   [![Build Status](https://travis-ci.org/zeeev/DASVC.svg?branch=master)](https://travis-ci.org/zeeev/DASVC) 
 A tool for calling SVs from genome-wide contig alignments.
+
 
 # What does the pipeline do?
 
@@ -19,6 +20,7 @@ The dependancies are only required if you'd like to run the whole pipeline.  Oth
 2. [LAST](http://last.cbrc.jp). Conversion from MAF to SAM
 3. [UCSC](https://github.com/ENCODE-DCC/kentUtils/tree/master/src). File conversion, chaining and netting.
 4. [SNAKEMAKE](https://bitbucket.org/snakemake/snakemake/wiki/Home). Running the pipeline.
+5. [CMAKE](https://cmake.org). Building Bamtools.
 
 # Installing
 0. Install dependancies
