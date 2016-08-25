@@ -1,5 +1,6 @@
-# DASVC - De-novo Assembly Structural Variant Caller 
+# DASVC - De-novo Assembly Structural Variant Caller   [![Build Status](https://travis-ci.org/zeeev/DASVC.svg?branch=master)](https://travis-ci.org/zeeev/DASVC) 
 A tool for calling SVs from genome-wide contig alignments.
+
 
 # What does the pipeline do?
 
