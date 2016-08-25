@@ -6,7 +6,7 @@
 
 CC=gcc
 CXX=g++
-CFLAGS= -Wall -DVERSION=\"$(GIT_VERSION)\" -std=c++0x -lm -lz
+CFLAGS= -Wall -DVERSION=\"$(GIT_VERSION)\" -std=c++0x
 INCLUDE  = -I src -I fastahack -I bamtools/include
 BAMTOOLS_LIB=bamtools/lib/libbamtools.a
 
@@ -26,7 +26,7 @@ src/%.o: src/%.cpp $(BAMTOOLS_LIB)
 	$(CXX) $(CFLAGS) $(INCLUDE) -c -o $@ $<
 
 bin/contigSV: $(OBJ_FILES) $(BAMTOOLS_LIB)
-	 $(CXX) $(CFLAGS) $(INCLUDE) $(OBJ_FILES) $(BAMTOOLS_LIB) -o bin/contigSV
+	 $(CXX) $(CFLAGS) $(INCLUDE) $(OBJ_FILES) $(BAMTOOLS_LIB) -o bin/contigSV -lm -lz
 
 fastahack/%.o:
 	cd fastahack && $(MAKE) ;
