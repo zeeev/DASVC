@@ -1,7 +1,9 @@
 {
+        "lastz_bin"      : "~zevk/lastz-distrib/bin/lastz_32",
         "contigsv_bin"   : "/net/eichler/vol8/home/zevk/tools/contigSV/bin/contigSV",
         "local_path"     : "/var/tmp/zevk/chimp/",
         "lastz_settings" : "--gfextend --gapped --step=10 --chain --inner=1000 --notransition --format=lav --identity=90 --matchcount=20 --xdrop=20",
+        "target_names_file"   : "target_names.txt",
         "target_name"    : "ucsc.hg38.no_alts.fasta",
         "target_path"    : "/net/eichler/vol2/eee_shared/assemblies/hg38/",
         "query_name"     : "clint.contigs.quiver.pilon.masked.fasta",
