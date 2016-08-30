@@ -76,10 +76,6 @@ bool largeDeletionPrint(std::list<BamAlignment> & twoReads,
     if(twoReads.front().RefID != twoReads.back().RefID){
         return false;
     }
-    if(twoReads.front().IsReverseStrand()
-       != twoReads.back().IsReverseStrand()){
-        return false;
-    }
 
     /* start and end of the SV relative to query */
 
@@ -109,10 +105,9 @@ bool largeDeletionPrint(std::list<BamAlignment> & twoReads,
     twoReads.back().GetTag<int>("MB", mbB);
 
 
-    if((alA + 1) != alB){
+    if(abs(alA - alB) > 1){
         return false;
     }
-
 
     int deletionL = abs( twoReads.back().Position -
                          twoReads.front().GetEndPosition());
@@ -153,10 +148,7 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
     if(twoReads.front().GetEndPosition() != twoReads.back().Position){
         return false;
     }
-    if(twoReads.front().IsReverseStrand()
-       != twoReads.back().IsReverseStrand()){
-        return false;
-    }
+
     if( twoReads.front().CigarData.back().Type != 'H' &&
         twoReads.back().CigarData.front().Type != 'H'){
         return false;
@@ -194,7 +186,7 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
     */
 
 
-    if((alA + 1) != alB){
+    if(abs(alA - alB) > 1){
         return false;
     }
 
@@ -204,7 +196,6 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
     if(insertionL < 20){
         return false;
     }
-
 
     std::cout << refName
               << "\t" << twoReads.front().GetEndPosition()
