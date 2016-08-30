@@ -53,7 +53,7 @@ rule annotateBam:
      input:  BAM="all_bam_read_sort/all.read_sort.bam", BIN={SV} , Q={QUERY}
      output: "all_bam_read_sort/all.read_sort_annotated.bam"
      params: sge_opts=config["cluster_settings"]["light"]
-     shell:  "{input.BIN} annotate {input.BAM} {output} {}"
+     shell:  "{input.BIN} annotate {input.BAM} {output} {input.Q}"
 
 rule readSort:
      input:  "all_bam/all.bam"
