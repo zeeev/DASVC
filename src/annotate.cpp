@@ -1,6 +1,5 @@
 #include "annotate.hpp"
 
-
 bool qStartSort(const BamAlignment L,
                 const BamAlignment R ){
 
@@ -17,7 +16,6 @@ bool qStartSort(const BamAlignment L,
     if(lp < rp){
         return true;
     }
-
 
     return false;
 }
@@ -52,6 +50,8 @@ int chainBlock(std::vector<BamAlignment> & reads,
         it->GetTag<int>("QS", qStart );
         it->GetTag<int>("QE", qEnd   );
 
+        //br.SaveAlignment(*it);
+
         qChain.addAlignment(qStart, qEnd, match);
 
     }
@@ -84,14 +84,16 @@ int chainBlock(std::vector<BamAlignment> & reads,
      reads[*it].AddTag<int>("TM", "i", totalMatchingBases);
      reads[*it].AddTag<int>("AI", "i", index);
      index++;
+
+
      br.SaveAlignment(reads[*it]);
 
-     /*     int qs, qe;
+     int qs, qe;
 
      reads[*it].GetTag<int>("QS", qs);
      reads[*it].GetTag<int>("QE", qe);
 
-     std::cerr << qs << " " << qe << std::endl; */
+     // std::cerr << qs << " " << qe << std::endl;
 
  }
 
@@ -131,7 +133,8 @@ int chainBlock(std::vector<BamAlignment> & reads,
 
 int processBlock(std::list< BamAlignment > & readBuffer ,
                  std::vector< BamAlignment > & processed,
-                 int blockId)
+                 int blockId,
+                 std::map<std::string, long int> & queryLens )
 {
 
     int totalAlignedBases = 0;
@@ -187,6 +190,22 @@ int processBlock(std::list< BamAlignment > & readBuffer ,
         }
         else{
             matchesPerContig[it->RefID] = matchingBases;
+        }
+
+        /* reverse strand needs to flip */
+
+        if(it->AlignmentFlag & 16){
+            if(queryLens.find(it->Name) == queryLens.end()){
+                std::cerr << "FATAL: query name not found in query .fai" << std::endl;
+                exit(1);
+            }
+
+            queryStart = queryLens[it->Name] - queryStart;
+            queryEnd   = queryLens[it->Name] - queryEnd  ;
+
+            int tmp = queryStart;
+            queryStart = queryEnd;
+            queryEnd   = tmp;
         }
 
         /* position where the alignment starts matching */
@@ -251,6 +270,37 @@ int processBlock(std::list< BamAlignment > & readBuffer ,
 
 //------------------------------- SUBROUTINE --------------------------------
 /*
+ Function input  : query fasta name, and a map <string, long int>
+ Function does   : loads up a map for lookup
+ Function returns: bool
+ Function details: reads and parses fai file.
+
+*/
+
+bool loadFai(std::string & fastaName,
+             std::map<std::string, long int> & dat)
+{
+    std::string fai = fastaName + ".fai";
+    std::string line;
+    std::ifstream myfile (fai);
+
+    if(myfile){
+        while(getline(myfile, line)){
+            std::vector<std::string> splitDat = split(line, "\t");
+            if(splitDat.size() < 2){
+                return false;
+            }
+            dat[splitDat[0]] = atol(splitDat[1].c_str());
+        }
+    }
+    else{
+        return false;
+    }
+
+    return true;
+}
+//------------------------------- SUBROUTINE --------------------------------
+/*
  Function input  : bam file input name
  Function does   : Opens a bam and adds an optional field
  Function returns: error code
@@ -259,14 +309,22 @@ int processBlock(std::list< BamAlignment > & readBuffer ,
 
 */
 
-int annotate(std::string bfName, std::string out)
+int annotate(std::string bfName,
+             std::string out,
+             std::string queryFa)
 {
     BamReader reader;
 
     errorHandler EH;
 
+    std::map<std::string, long int> queryLens;
+
+    if(!loadFai(queryFa, queryLens)){
+        EH.croak(EH.COULD_NOT_OPEN_FAI, true );
+    }
+
     if(!reader.Open(bfName)){
-        EH.croak(EH.COULD_NOT_OPEN_BAM, true);
+        EH.croak(EH.COULD_NOT_OPEN_BAM, true );
     }
 
     const SamHeader header     = reader.GetHeader();
@@ -312,7 +370,7 @@ int annotate(std::string bfName, std::string out)
 
                 std::vector<BamAlignment> filtReads;
 
-                processBlock(readBuffer, filtReads, blockId);
+                processBlock(readBuffer, filtReads, blockId, queryLens);
                 chainBlock(filtReads, writer,  references);
 
                 readBuffer.clear()      ;
@@ -327,7 +385,7 @@ int annotate(std::string bfName, std::string out)
     blockId += 1;
 
     std::vector<BamAlignment> filtReadsB;
-    processBlock(readBuffer, filtReadsB, blockId );
+    processBlock(readBuffer, filtReadsB, blockId, queryLens );
     chainBlock(filtReadsB, writer, references    );
 
     reader.Close();

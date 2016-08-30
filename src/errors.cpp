@@ -10,6 +10,7 @@ errorHandler::errorHandler(void){
     error_message.push_back( std::string("FATAL: Bad command line option."              ));
     error_message.push_back( std::string("FATAL: BAM not annotated."                    ));
     error_message.push_back(usage_statement                                              );
+    error_message.push_back( std::string("FATAL: Could not read *.fai"                  ));
 }
 
 void errorHandler::croak(errors i, bool ex){

@@ -13,7 +13,8 @@ public:
         NO_READS,
         BAD_COMMAND_LINE_OPTION,
         BAM_NOT_ANNOTATED,
-        USAGE
+        USAGE,
+        COULD_NOT_OPEN_FAI
     };
 
     enum info{

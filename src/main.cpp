@@ -29,7 +29,8 @@ int main(int argc, char ** argv)
     case 1:
         {
             return annotate((std::string)argv[2],
-                            (std::string)argv[3]);
+                            (std::string)argv[3],
+                            (std::string)argv[4]);
             break;
         }
     case 2:

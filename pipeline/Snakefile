@@ -50,10 +50,10 @@ rule posSort:
      shell : "samtools sort -o {output} {input}"
 
 rule annotateBam:
-     input:  BAM="all_bam_read_sort/all.read_sort.bam", BIN={SV}
+     input:  BAM="all_bam_read_sort/all.read_sort.bam", BIN={SV} , Q={QUERY}
      output: "all_bam_read_sort/all.read_sort_annotated.bam"
      params: sge_opts=config["cluster_settings"]["light"]
-     shell:  "{input.BIN} annotate {input.BAM} {output}"
+     shell:  "{input.BIN} annotate {input.BAM} {output} {}"
 
 rule readSort:
      input:  "all_bam/all.bam"
@@ -89,7 +89,7 @@ rule filtNet:
      input:  "net/all-no-class.net"
      output: "filt_net/all-no-class.filt.net"
      params: sge_opts=config["cluster_settings"]["light"]
-     shell:  "netFilter -chimpSyn {input} > {output} && netToBed {output} filt_net/all-no-class-filter.bed"
+     shell:  "netFilter {input} > {output} && netToBed {output} filt_net/all-no-class-filter.bed"
 
 rule net:
      input:  CHAIN="merged_chains/all.chain.filter.prenet.chain", TS="stats/target.sizes", QS="stats/query.sizes"
