@@ -45,12 +45,14 @@ int chainBlock(std::vector<BamAlignment> & reads,
         int match ;
         int qStart;
         int qEnd  ;
+        int qLen  ;
 
+        it->GetTag<int>("QL", qLen   );
         it->GetTag<int>("MB", match  );
         it->GetTag<int>("QS", qStart );
         it->GetTag<int>("QE", qEnd   );
 
-        //br.SaveAlignment(*it);
+        //        br.SaveAlignment(*it);
 
         qChain.addAlignment(qStart, qEnd, match);
 
@@ -85,16 +87,7 @@ int chainBlock(std::vector<BamAlignment> & reads,
      reads[*it].AddTag<int>("AI", "i", index);
      index++;
 
-
      br.SaveAlignment(reads[*it]);
-
-     int qs, qe;
-
-     reads[*it].GetTag<int>("QS", qs);
-     reads[*it].GetTag<int>("QE", qe);
-
-     // std::cerr << qs << " " << qe << std::endl;
-
  }
 
  int qs;

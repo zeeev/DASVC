@@ -26,9 +26,14 @@ void alignmentInternalPrint(BamAlignment & al,
 
     float pctA;
     int mbA;
+    int qStart;
+    int qEnd;
 
     al.GetTag<float>("PI", pctA);
     al.GetTag<int>("MB", mbA   );
+    al.GetTag<int>("QE", qStart);
+    al.GetTag<int>("QS", qEnd  );
+
 
     for(std::vector< CigarOp >::iterator it = al.CigarData.begin();
         it != al.CigarData.end(); it++){
@@ -39,11 +44,13 @@ void alignmentInternalPrint(BamAlignment & al,
                 std::cout << refName
                           << "\t" << rPos
                           << "\t" << rPos
+                          << "\t" << "INS:INTERNAL"
                           << "\t" << it->Length
                           << "\t" << pctA
                           << "\t" << mbA
                           << "\t" << al.Name
-                          << "\t" << "INS:INTERNAL"
+                          << "\t" << qStart
+                          << "\t" << qEnd
                           << "\t" << al.QueryBases.substr(qPos, it->Length)
                           << std::endl;
             }
@@ -51,11 +58,13 @@ void alignmentInternalPrint(BamAlignment & al,
                 std::cout << refName
                           << "\t" << rPos
                           << "\t" << (rPos + it->Length)
+                          << "\t" << "DEL:INTERNAL"
                           << "\t" << it->Length
                           << "\t" << pctA
                           << "\t" << mbA
                           << "\t" << al.Name
-                          << "\t" << "DEL:INTERNAL"
+                          << "\t" << qStart
+                          << "\t" << qEnd
                           << "\t" << targetFa.getSubSequence(refName,
                                                              rPos, it->Length)
                           << std::endl;
@@ -105,6 +114,7 @@ bool largeDeletionPrint(std::list<BamAlignment> & twoReads,
     twoReads.back().GetTag<int>("MB", mbB);
 
 
+
     if(abs(alA - alB) > 1){
         return false;
     }
@@ -119,11 +129,13 @@ bool largeDeletionPrint(std::list<BamAlignment> & twoReads,
     std::cout << refName
               << "\t" << twoReads.front().GetEndPosition()
               << "\t" << twoReads.back().Position
+              << "\t" << "DEL:BETWEEN"
               << "\t" << deletionL
               << "\t" << pctA << "," << pctB
               << "\t" << mbA << "," << mbB
               << "\t" << twoReads.front().Name
-              << "\t" << "DEL:BETWEEN"
+              << "\t" << qStart
+              << "\t" << qEnd
               << "\t" << targetFasta.getSubSequence(refName,
                                                    twoReads.front().GetEndPosition(),
                                                     deletionL) << std::endl;
@@ -168,23 +180,20 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
     int mbA;
     int mbB;
 
-
     twoReads.front().GetTag<int>("QE", qStart);
-    twoReads.back().GetTag<int>("QS", qEnd);
+    twoReads.back().GetTag<int>("QS",  qEnd);
 
     twoReads.front().GetTag<int>("AI", alA);
-    twoReads.back().GetTag<int>("AI", alB);
+    twoReads.back().GetTag<int>("AI",  alB);
 
     twoReads.front().GetTag<float>("PI", pctA);
-    twoReads.back().GetTag<float>("PI", pctB);
+    twoReads.back().GetTag<float>("PI",  pctB);
 
     twoReads.front().GetTag<int>("MB", mbA);
-    twoReads.back().GetTag<int>("MB", mbB);
-
+    twoReads.back().GetTag<int>("MB",  mbB);
 
     /* next alignment block needs to be the next query block.
     */
-
 
     if(abs(alA - alB) > 1){
         return false;
@@ -200,11 +209,13 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
     std::cout << refName
               << "\t" << twoReads.front().GetEndPosition()
               << "\t" << twoReads.front().GetEndPosition()
+              << "\t" << "INS:BETWEEN"
               << "\t" << insertionL
               << "\t" << pctA << "," << pctB
               << "\t" << mbA << "," << mbB
               << "\t" << twoReads.front().Name
-              << "\t" << "INS:BETWEEN"
+              << "\t" << qStart
+              << "\t" << qEnd
               << "\t" << queryFasta.getSubSequence(twoReads.front().Name,
                                                    qStart,
                                                    insertionL)
@@ -220,7 +231,7 @@ int varcall(std::string & bname,   /* bam name */
             std::string & qf    )  /* query fasta */
 {
 
-    std::cout << "#target_name\ttarget_pos\ttarget_end\tsv_length\tper_id\tmatching_bases\tquery_name\tsequence" << std::endl;
+    std::cout << "#target_name\ttarget_pos\tsv_type\ttarget_end\tsv_length\tper_id\tmatching_bases\tquery_name\tquery_start\tquery_end\tsequence" << std::endl;
 
     errorHandler EH;
 
@@ -259,10 +270,9 @@ int varcall(std::string & bname,   /* bam name */
 
         if(readBuffer.size() == 2){
             largeInsertionPrint(readBuffer, queryFasta,
-                                rv[al.RefID].RefName  );
+                                rv[readBuffer.front().RefID].RefName  );
             largeDeletionPrint(readBuffer, targetFasta,
-                               rv[al.RefID].RefName  );
-
+                               rv[readBuffer.front().RefID].RefName  );
 
             readBuffer.pop_front();
         }
