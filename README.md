@@ -35,7 +35,19 @@ make
 
 2. Export paths to binaries 
 3. Modify the config file: "pipeline/config.json"
-4. Run Snakemake
+4. Run Snakemake :
+
+locally with 5 jobs :
+
+```
+snakemake -s Snakefile -j 25 -w 50
+```
+
+cluster with 25 jobs :
+
+```
+snakemake  -c "qsub {params.sge_opts}" -s Snakefile -j 25 -w 50
+```
 
 # Annotations added to BAM file
 
