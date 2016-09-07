@@ -82,6 +82,7 @@ bool largeDeletionPrint(std::list<BamAlignment> & twoReads,
     if(twoReads.front().GetEndPosition() == twoReads.back().Position){
         return false;
     }
+
     if(twoReads.front().RefID != twoReads.back().RefID){
         return false;
     }
@@ -112,7 +113,6 @@ bool largeDeletionPrint(std::list<BamAlignment> & twoReads,
 
     twoReads.front().GetTag<int>("MB", mbA);
     twoReads.back().GetTag<int>("MB", mbB);
-
 
 
     if(abs(alA - alB) > 1){
@@ -156,20 +156,14 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
     if(twoReads.front().RefID != twoReads.back().RefID){
         return false;
     }
-    /* deletions bodering and insertion will be a problem */
-    if(twoReads.front().GetEndPosition() != twoReads.back().Position){
-        return false;
-    }
 
-    if( twoReads.front().CigarData.back().Type != 'H' &&
-        twoReads.back().CigarData.front().Type != 'H'){
-        return false;
-    }
 
     /* start and end of the SV relative to query */
 
-    int qStart ;
-    int qEnd   ;
+    int qStartA ;
+    int qStartB ;
+    int qEndA   ;
+    int qEndB   ;
 
     int alA ;
     int alB ;
@@ -180,8 +174,10 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
     int mbA;
     int mbB;
 
-    twoReads.front().GetTag<int>("QE", qStart);
-    twoReads.back().GetTag<int>("QS",  qEnd);
+    twoReads.front().GetTag<int>("QS", qStartA);
+    twoReads.front().GetTag<int>("QE",   qEndA);
+    twoReads.back().GetTag<int>("QS",  qStartB);
+    twoReads.back().GetTag<int>("QE",    qEndB);
 
     twoReads.front().GetTag<int>("AI", alA);
     twoReads.back().GetTag<int>("AI",  alB);
@@ -199,8 +195,15 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
         return false;
     }
 
+    long int istart = qEndA   ;
+    long int iend   = qStartB ;
 
-    int insertionL = qEnd - qStart;
+    if(alA > alB){
+        istart = qEndB        ;
+        iend   = qStartA      ;
+    }
+
+    int insertionL = iend - istart;
 
     if(insertionL < 20){
         return false;
@@ -214,10 +217,10 @@ bool largeInsertionPrint(std::list<BamAlignment> & twoReads,
               << "\t" << pctA << "," << pctB
               << "\t" << mbA << "," << mbB
               << "\t" << twoReads.front().Name
-              << "\t" << qStart
-              << "\t" << qEnd
+              << "\t" << istart
+              << "\t" << iend
               << "\t" << queryFasta.getSubSequence(twoReads.front().Name,
-                                                   qStart,
+                                                   istart,
                                                    insertionL)
 
               << std::endl;

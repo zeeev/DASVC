@@ -8,6 +8,7 @@
         "target_path"    : "/net/eichler/vol2/eee_shared/assemblies/hg38/",
         "query_name"     : "clint.contigs.quiver.pilon.masked.fasta",
         "query_path"     : "/net/eichler/vol25/projects/whole_genome_assembly/nobackups/chimp/Drafts/V3.0a-falcon/repeat_masker/",
+        "window_size"    : "1000000",
 
         "cluster_settings" : {
                            "heaviest" : " -l mfree=20G -l h_rt=48:00:00 -q eichler-short.q  -l disk_free=10G",
