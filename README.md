@@ -16,15 +16,16 @@ A tool for calling SVs from genome-wide contig alignments.
 
 The dependancies are only required if you'd like to run the whole pipeline.  Otherwise, you can build you own netted SAM file and run the last step.
 
-1. [LASTZ](http://www.bx.psu.edu/miller_lab/dist/README.lastz-1.02.00/README.lastz-1.02.00a.html). For aligning contigs to a reference genome.
-2. [LAST](http://last.cbrc.jp). Conversion from MAF to SAM
+1. [LASTZ](http://www.bx.psu.edu/miller_lab/dist/README.lastz-1.02.00/README.lastz-1.02.00a.html). For aligning contigs to a reference genome (lastz-distrib-1.03.73).
+2. [LAST](http://last.cbrc.jp). Conversion from MAF to SAM (last/744).
 3. [UCSC](https://github.com/ENCODE-DCC/kentUtils/tree/master/src). File conversion, chaining and netting.
 4. [SNAKEMAKE](https://bitbucket.org/snakemake/snakemake/wiki/Home). Running the pipeline.
 5. [CMAKE](https://cmake.org). Building Bamtools.
+6. [BEDTOOLS](http://bedtools.readthedocs.io/en/latest/). Basic range operations (2.21.0) 
 
 # Installing
 0. Install dependancies
-1. get and build code
+1. get and build code :
 
 ```
 git clone --recursive https://github.com/zeeev/DASVC.git
@@ -34,8 +35,19 @@ make
 
 2. Export paths to binaries 
 3. Modify the config file: "pipeline/config.json"
-4. Run Snakemake
+4. Run Snakemake :
 
+locally with 5 jobs :
+
+```
+snakemake -s Snakefile -j 25 -w 50
+```
+
+cluster with 25 jobs :
+
+```
+snakemake  -c "qsub {params.sge_opts}" -s Snakefile -j 25 -w 50
+```
 
 # Annotations added to BAM file
 
