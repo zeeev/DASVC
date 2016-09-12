@@ -1,4 +1,5 @@
 {
+        "tmp_dir"        : "$TMPDIR/"
         "lastz_bin"      : "~zevk/lastz-distrib/bin/lastz_32",
         "contigsv_bin"   : "/net/eichler/vol8/home/zevk/tools/contigSV/bin/contigSV",
         "local_path"     : "/var/tmp/zevk/chimp/",

@@ -9,9 +9,11 @@ import csv
 TN=config["target_names_file"]
 REGIONS=[line.rstrip('\n') for line in open(config["target_names_file"])]
 
-LZ   = config["lastz_bin"]
-SV   = config["contigsv_bin"]
-POST = config["lastz_settings"]
+
+TMPDIR = config["tmp_dir"]
+LZ     = config["lastz_bin"]
+SV     = config["contigsv_bin"]
+POST   = config["lastz_settings"]
 
 TARGET  = config["target_path"] + config["target_name"]
 TARGETI = TARGET + ".fai"
@@ -172,7 +174,7 @@ rule runLastZ:
      input:  T={TARGET}, Q={QUERY}
      output: "raw_lav/{contig}.lav"
      params: sge_opts=config["cluster_settings"]["heaviest"]
-     shell:  "{RS_LT} ; {RS_LQ} ; {RS_LTI} ; {RS_LQI} ; {FAIDX} {wildcards.contig} > $TMPDIR/q.fasta ; {LZ} $TMPDIR/q.fasta {LQ} {POST} > {output}"
+     shell:  "{RS_LT} ; {RS_LQ} ; {RS_LTI} ; {RS_LQI} ; {FAIDX} {wildcards.contig} > {TMPDIR}/{wildcards.contig}.fasta ; {LZ} {TMPDIR}/{wildcards.contig}.fasta {LQ} {POST} > {output}"
 
 rule stats:
      message : "INFO: getting target and query stats"
