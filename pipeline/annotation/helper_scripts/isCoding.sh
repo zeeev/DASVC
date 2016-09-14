@@ -7,4 +7,4 @@ bedtools subtract  -a $1 -b $2 -A | perl -lane 'print "$_\tnon_coding_variant"' 
 
 sort -k1,1 -k2,2n tmp.bed > $3
 
-
+rm tmp.bed

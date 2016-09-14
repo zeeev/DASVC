@@ -1,8 +1,12 @@
 {
+        "final_name"       : "susieAnnoatedSVs.bed",
+        "seg_dups"         : "/net/eichler/vol8/home/zevk/shared_resources/assemblies/hg38/wgac/wgac_filtered.bed",
+        "rvis_addy"        : "http://genic-intolerance.org/data/RVIS_Unpublished_ExAC_May2015.txt",
         "sv_calls"         : "../susie3_human/filtered_sv_calls/filt.calls.bed",
         "ref_exons"        : "/net/eichler/vol8/home/zevk/shared_resources/assemblies/hg38/genes/refGene.exons.bed",
         "cds_exons"        : "/net/eichler/vol8/home/zevk/shared_resources/assemblies/hg38/genes/refGene.CDS_exons.bed",
         "cluster_settings" : {
-                           "light" : "-l h_rt=1:00:00 -l mfree=10G -q eichler-short.q"
+                           "light"  : "-l h_rt=1:00:00 -l mfree=10G -q eichler-short.q",
+                           "medium" : "-l h_rt=1:00:00 -l mfree=20G -q eichler-short.q"
         }
 }
