@@ -143,38 +143,38 @@ rule net:
 
 rule filter:
      message : "INFO: filtering merged chain"
-     input:  CHAINS="merged_chains/all.chain", TS="stats/target.sizes", QS="stats/query.sizes"
+     input:  CHAINS="chained_psl/chained.chain", TS="stats/target.sizes", QS="stats/query.sizes"
      params: sge_opts=config["cluster_settings"]["light"]
      output: "merged_chains/all.chain.filter.prenet.chain"
      shell:  "chainPreNet {input.CHAINS} {input.TS} {input.QS} {output}"
 
-rule merge:
-     message : "INFO: merging chains"
-     input:  expand("chained_psl/{contig}.chained.psl", contig=REGIONS)
-     output: "merged_chains/all.chain"
-     params:  sge_opts=config["cluster_settings"]["light"]
-     shell:  "chainMergeSort {input} > {output}"
-
-rule chain:
+rule chain   :
      message : "INFO: chaining alignment"
-     input:  PSL="raw_psl/{contig}.psl", T2BIT="2bits/target.2bit", Q2BIT="2bits/query.2bit"
-     output: temp("chained_psl/{contig}.chained.psl")
-     params: sge_opts=config["cluster_settings"]["light"]
-     shell:  "axtChain -linearGap=medium -psl {input.PSL} {input.T2BIT} {input.Q2BIT} {output}"
+     input   :  PSL="merged_psl/merged.psl", T2BIT="2bits/target.2bit", Q2BIT="2bits/query.2bit"
+     output  : temp("chained_psl/chained.chain")
+     params  : sge_opts=config["cluster_settings"]["heaviest"]
+     shell   : "axtChain -linearGap=medium -psl {input.PSL} {input.T2BIT} {input.Q2BIT} {output}"
+
+rule mergePsl:
+     message : "INFO: merging psl"
+     input   : expand("raw_psl/{contig}.psl", contig=REGIONS)
+     output  : "merged_psl/merged.psl"
+     params  : sge_opts=config["cluster_settings"]["light"]
+     shell   : "pslCat {input} > {output}"
 
 rule lav_to_psl:
-     message : "INFO: coverting lav to psl"
-     input:  "raw_lav/{contig}.lav"
-     output: "raw_psl/{contig}.psl"
-     params: sge_opts="-l mfree=10G -l h_rt=24:00:00 -q eichler-short.q"
-     shell:  "lavToPsl {input} {output}"
+     message   : "INFO: coverting lav to psl"
+     input     : "raw_lav/{contig}.lav"
+     output    : "raw_psl/{contig}.psl"
+     params    :  sge_opts=config["cluster_settings"]["heavy"]
+     shell     :  "lavToPsl {input} {output}"
 
 rule runLastZ:
      message : "INFO: running lastz, please wait, it could take a while"
-     input:  T={TARGET}, Q={QUERY}
-     output: "raw_lav/{contig}.lav"
-     params: sge_opts=config["cluster_settings"]["heaviest"]
-     shell:  "{RS_LT} ; {RS_LQ} ; {RS_LTI} ; {RS_LQI} ; {FAIDX} {wildcards.contig} > {TMPDIR}/{wildcards.contig}.fasta ; {LZ} {TMPDIR}/{wildcards.contig}.fasta {LQ} {POST} > {output}"
+     input   :  T={TARGET}, Q={QUERY}
+     output  : "raw_lav/{contig}.lav"
+     params  : sge_opts=config["cluster_settings"]["heaviest"]
+     shell   :  "{RS_LT} ; {RS_LQ} ; {RS_LTI} ; {RS_LQI} ; {FAIDX} {wildcards.contig} > {TMPDIR}/{wildcards.contig}.fasta ; {LZ} {TMPDIR}/{wildcards.contig}.fasta {LQ} {POST} > {output}"
 
 rule stats:
      message : "INFO: getting target and query stats"
