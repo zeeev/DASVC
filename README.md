@@ -61,3 +61,19 @@ snakemake  -c "qsub {params.sge_opts}" -s Snakefile -j 25 -w 50
 6. "BI" Block ID (equivalent to query name)
 9. "TM" Total matching bases in query sequence
 10. "AI" Query order 1,2,3....
+
+#Structural variant (SV) format
+
+The SV calls are in bed format:
+
+1. Target seqid
+2. Target start
+3. target end
+4. SV type (internal is contained within an alignment block)
+5. SV length (insertions are in query length)
+6. Percent identity in alignment block or for flanking alignment blocks
+7. Number of bases matching in alignment block or for flanking alignment blocks
+8. Query seqid
+9. Query start
+10. Query end
+11. Sequence (for deletions it's the target sequence and insertions are the query sequence)
