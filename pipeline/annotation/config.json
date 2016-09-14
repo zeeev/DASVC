@@ -1,0 +1,8 @@
+{
+        "sv_calls"         : "../susie3_human/filtered_sv_calls/filt.calls.bed",
+        "ref_exons"        : "/net/eichler/vol8/home/zevk/shared_resources/assemblies/hg38/genes/refGene.exons.bed",
+        "cds_exons"        : "/net/eichler/vol8/home/zevk/shared_resources/assemblies/hg38/genes/refGene.CDS_exons.bed",
+        "cluster_settings" : {
+                           "light" : "-l h_rt=1:00:00 -l mfree=10G -q eichler-short.q"
+        }
+}
