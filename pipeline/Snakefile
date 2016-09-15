@@ -33,14 +33,14 @@ rule filterSVcov:
      message: "INFO: removing low coverage windows"
      input  : SV="raw_sv_calls/calls.sort.bed", COV="coverage_stats/target_windows.cov.lc.bed"
      output : "filtered_sv_calls/filt.calls.bed"
-     params : sge_opts=config["cluster_settings"]["light"]
+     params : sge_opts=config["cluster_settings"]["lite"]
      shell  : "bedtools subtract -A -a {input.SV} -b {input.COV} > {output}"
 
 rule getBad :
      message: "INFO: finding low coverage windows"
      input  : "coverage_stats/target_windows.cov.bed"
      output : "coverage_stats/target_windows.cov.lc.bed"
-     params : sge_opts=config["cluster_settings"]["light"]
+     params : sge_opts=config["cluster_settings"]["lite"]
      shell  : " awk ' $7 < 0.5 {{print}} ' {input} > {output}"
 
 rule getCoverage:
@@ -54,7 +54,7 @@ rule makeWindows:
      message: "INFO: building windows across target"
      input  : TAFI={TARGETI}
      output : temp("coverage_stats/target_windows.bed")
-     params : sge_opts=config["cluster_settings"]["light"], WS=config["window_size"]
+     params : sge_opts=config["cluster_settings"]["lite"], WS=config["window_size"]
      shell: "bedtools makewindows -g {input} -w {params.WS} -s {params.WS} > {output} "
 
 rule varSort:
@@ -68,14 +68,14 @@ rule call:
      message : "INFO: calling variants"
      input: BAM="all_final_bam/final.sort.bam", BI="all_final_bam/final.sort.bam.bai", TF={TARGET}, QU={QUERY}, BIN={SV}
      output: temp("raw_sv_calls/calls.bed")
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell: "{input.BIN} varcall {input.BAM} {input.TF} {input.QU} > {output}"
 
 rule index:
      message : "INFO: indexing annoated and target-position sorted bam"
      input : "all_final_bam/final.sort.bam"
      output: "all_final_bam/final.sort.bam.bai"
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell : "samtools index {input}"
 
 rule posSort:
@@ -89,62 +89,62 @@ rule annotateBam:
      message : "INFO: Adding query annotations to bam file"
      input:  BAM="all_bam_read_sort/all.read_sort.bam", BIN={SV} , Q={QUERY}, QI={QUERYI}
      output: "all_bam_read_sort/all.read_sort_annotated.bam"
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell:  "{input.BIN} annotate {input.BAM} {output} {input.Q}"
 
 rule readSort:
      message : "INFO: read sorting bam"
      input:  "all_bam/all.bam"
      output: "all_bam_read_sort/all.read_sort.bam"
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell:  "samtools sort -n -l 0 -o {output} {input}"
 
 rule samTobam:
      message : "INFO: converting sam to bam"
      input:  SAM="all_sam/all.sam",  T={TARGETI}
      output: temp("all_bam/all.bam")
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell:  "samtools view -bt {input.T} {input.SAM} > {output}"
 
 rule finalMafToSam:
      message : "INFO: converting maf to sam"
      input : MAF="all_maf/all.maf"
      output: temp("all_sam/all.sam")
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell:  "maf-convert sam {input.MAF} > {output}"
 
 rule finalAxtToMaf:
      message : "INFO:  coverting axt to maf"
      input:  AX="all_axt/all_filt_no_class.axt", TS="stats/target.sizes", QS="stats/query.sizes"
      output: temp("all_maf/all.maf")
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell: "axtToMaf {input.AX} {input.TS} {input.QS} {output}"
 
 rule netToAxt:
      message : "INFO: converting net to axt"
      input:  NET="net/all-no-class.net", CHAIN="merged_chains/all.chain.filter.prenet.chain", TA2="2bits/target.2bit", QU2="2bits/query.2bit"
      output: temp("all_axt/all_filt_no_class.axt")
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell: "netToAxt {input.NET} {input.CHAIN} {input.TA2} {input.QU2} {output}"
 
 rule filtNet:
      message : "INFO: filtering net file"
      input:  "net/all-no-class.net"
      output: "filt_net/all-no-class.filt.net"
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell:  "netFilter {input} > {output} && netToBed {output} filt_net/all-no-class-filter.bed"
 
 rule net:
      message : "INFO: netting merged chain"
      input:  CHAIN="merged_chains/all.chain.filter.prenet.chain", TS="stats/target.sizes", QS="stats/query.sizes"
      output: "net/all-no-class.net"
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell:  "chainNet {input.CHAIN}  -minSpace=1 {input.TS} {input.QS}  stdout /dev/null  |  netSyntenic stdin {output}"
 
 rule filter:
      message : "INFO: filtering merged chain"
      input:  CHAINS="chained_psl/chained.chain", TS="stats/target.sizes", QS="stats/query.sizes"
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      output: "merged_chains/all.chain.filter.prenet.chain"
      shell:  "chainPreNet {input.CHAINS} {input.TS} {input.QS} {output}"
 
@@ -159,7 +159,7 @@ rule mergePsl:
      message : "INFO: merging psl"
      input   : expand("raw_psl/{contig}.psl", contig=REGIONS)
      output  : "merged_psl/merged.psl"
-     params  : sge_opts=config["cluster_settings"]["light"]
+     params  : sge_opts=config["cluster_settings"]["lite"]
      shell   : "pslCat {input} > {output}"
 
 rule lav_to_psl:
@@ -180,7 +180,7 @@ rule stats:
      message : "INFO: getting target and query stats"
      input:  T={TARGET}, Q={QUERY}
      output: "stats/target.sizes", "stats/query.sizes"
-     params: sge_opts=config["cluster_settings"]["light"]
+     params: sge_opts=config["cluster_settings"]["lite"]
      shell:  "faSize {input.T} -detailed > {output[0]} && faSize {input.Q} -detailed > {output[1]}"
 
 rule twobit:

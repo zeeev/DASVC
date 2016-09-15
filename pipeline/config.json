@@ -1,5 +1,5 @@
 {
-        "tmp_dir"        : "$TMPDIR/"
+        "tmp_dir"        : "$TMPDIR/",
         "lastz_bin"      : "~zevk/lastz-distrib/bin/lastz_32",
         "contigsv_bin"   : "/net/eichler/vol8/home/zevk/tools/contigSV/bin/contigSV",
         "local_path"     : "/var/tmp/zevk/chimp/",
@@ -14,6 +14,6 @@
         "cluster_settings" : {
                            "heaviest" : " -l mfree=20G -l h_rt=48:00:00 -q eichler-short.q  -l disk_free=10G",
                            "heavy"    : " -l mfree=20G -l h_rt=24:00:00 -q eichler-short.q  -l disk_free=10G",
-                           "light"    : " -l mfree=10G -l h_rt=02:00:00 -q eichler-short.q  -l disk_free=10G"
+                           "lite"    : " -l mfree=10G -l h_rt=02:00:00 -q eichler-short.q  -l disk_free=10G"
         }
 }
